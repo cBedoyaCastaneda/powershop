@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.css';
+import products from "../components/products/productList/productList.jsx";
 
 // Componente Cart
 function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
@@ -42,21 +43,21 @@ function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
                     </div>
                     <div className="item-actions">
                       <div className="quantity-controls">
-                        <button 
+                        <button
                           className="qty-btn"
                           onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
                         >
                           -
                         </button>
                         <span className="quantity">{item.quantity}</span>
-                        <button 
+                        <button
                           className="qty-btn"
                           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
                         >
                           +
                         </button>
                       </div>
-                      <button 
+                      <button
                         className="remove-btn"
                         onClick={() => onRemoveItem(item.id)}
                         title="Eliminar producto"
@@ -100,23 +101,12 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
 
-  const products = [
-    { id: 1, name: 'Laptop Pro', price: 1299, category: 'Electrónica', image: '💻' },
-    { id: 2, name: 'Smartphone X', price: 899, category: 'Electrónica', image: '📱' },
-    { id: 3, name: 'Auriculares Wireless', price: 199, category: 'Audio', image: '🎧' },
-    { id: 4, name: 'Smartwatch', price: 299, category: 'Wearables', image: '⌚' },
-    { id: 5, name: 'Tablet Plus', price: 649, category: 'Electrónica', image: '📱' },
-    { id: 6, name: 'Cámara 4K', price: 799, category: 'Fotografía', image: '📷' },
-    { id: 7, name: 'Teclado Mecánico', price: 149, category: 'Accesorios', image: '⌨️' },
-    { id: 8, name: 'Mouse Gaming', price: 79, category: 'Accesorios', image: '🖱️' },
-  ];
-
   const categories = ['Todos', 'Electrónica', 'Audio', 'Wearables', 'Fotografía', 'Accesorios'];
 
   const addToCart = (product) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
-      
+
       if (existingItem) {
         return prevItems.map(item =>
           item.id === product.id
@@ -124,7 +114,7 @@ function App() {
             : item
         );
       }
-      
+
       return [...prevItems, { ...product, quantity: 1 }];
     });
   };
@@ -134,7 +124,7 @@ function App() {
       removeItem(id);
       return;
     }
-    
+
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.id === id ? { ...item, quantity: newQuantity } : item
@@ -166,10 +156,10 @@ function App() {
             <span className="logo-icon">🛒</span>
             <h1>TechStore</h1>
           </div>
-          
+
           <div className="search-bar">
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -203,7 +193,7 @@ function App() {
           <h3>Categorías</h3>
           <div className="categories">
             {categories.map(category => (
-              <button 
+              <button
                 key={category}
                 className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(category)}
@@ -227,8 +217,8 @@ function App() {
                   <span className="product-category">{product.category}</span>
                   <h4>{product.name}</h4>
                   <p className="product-price">${product.price}</p>
-                  <button 
-                    className="add-to-cart-btn" 
+                  <button
+                    className="add-to-cart-btn"
                     onClick={() => addToCart(product)}
                   >
                     Agregar al Carrito
