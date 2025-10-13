@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import './App.css';
 
 function App() {
   const [cartCount, setCartCount] = useState(0);
