@@ -41,21 +41,21 @@ function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
                     </div>
                     <div className="item-actions">
                       <div className="quantity-controls">
-                        <button 
+                        <button
                           className="qty-btn"
                           onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
                         >
                           -
                         </button>
                         <span className="quantity">{item.quantity}</span>
-                        <button 
+                        <button
                           className="qty-btn"
                           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
                         >
                           +
                         </button>
                       </div>
-                      <button 
+                      <button
                         className="remove-btn"
                         onClick={() => onRemoveItem(item.id)}
                         title="Eliminar producto"
