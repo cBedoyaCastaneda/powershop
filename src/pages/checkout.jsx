@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { CreditCard, Lock, ShoppingCart, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import '../pages/checkout.css'
 
 export default function Checkout() {
+  const navigate = useNavigate()
+
   const [cartItems, setCartItems] = useState([
     { id: 1, name: 'Laptop Pro 15"', price: 1299.99, quantity: 1, image: '💻' },
     { id: 2, name: 'Mouse Inalámbrico', price: 29.99, quantity: 2, image: '🖱️' },
@@ -47,10 +50,21 @@ export default function Checkout() {
   const handleSubmit = (e) => {
     e.preventDefault()
     setIsProcessing(true)
-    
+
+    // 🔹 Guardar en sessionStorage
+    const checkoutData = {
+      cartItems,
+      formData,
+      summary: { subtotal, tax, shipping, total },
+      date: new Date().toLocaleString()
+    }
+
+    sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData))
+
+    // 🔹 Simular proceso de pago y redirigir
     setTimeout(() => {
-      alert('¡Compra procesada exitosamente! 🎉')
       setIsProcessing(false)
+      navigate('/Compra-Finalizada')
     }, 2000)
   }
 
@@ -69,6 +83,7 @@ export default function Checkout() {
         <div className="checkout-grid">
           {/* Formulario */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            
             {/* Información de Contacto */}
             <div className="checkout-card">
               <h2 className="checkout-card h2" style={{ marginBottom: '1.2rem' }}>
@@ -92,39 +107,11 @@ export default function Checkout() {
                 📍 Dirección de Envío
               </h2>
               <div className="checkout-form-group">
-                <input
-                  type="text"
-                  name="fullName"
-                  placeholder="Nombre completo"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  className="checkout-input"
-                />
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Dirección"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="checkout-input"
-                />
+                <input type="text" name="fullName" placeholder="Nombre completo" value={formData.fullName} onChange={handleInputChange} className="checkout-input" />
+                <input type="text" name="address" placeholder="Dirección" value={formData.address} onChange={handleInputChange} className="checkout-input" />
                 <div className="checkout-form-row">
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="Ciudad"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="checkout-input"
-                  />
-                  <input
-                    type="text"
-                    name="zipCode"
-                    placeholder="Código Postal"
-                    value={formData.zipCode}
-                    onChange={handleInputChange}
-                    className="checkout-input"
-                  />
+                  <input type="text" name="city" placeholder="Ciudad" value={formData.city} onChange={handleInputChange} className="checkout-input" />
+                  <input type="text" name="zipCode" placeholder="Código Postal" value={formData.zipCode} onChange={handleInputChange} className="checkout-input" />
                 </div>
               </div>
             </div>
@@ -136,42 +123,11 @@ export default function Checkout() {
                 Información de Pago
               </h2>
               <form onSubmit={handleSubmit} className="checkout-form-group">
-                <input
-                  type="text"
-                  name="cardNumber"
-                  placeholder="Número de tarjeta"
-                  value={formData.cardNumber}
-                  onChange={handleInputChange}
-                  maxLength="19"
-                  className="checkout-input"
-                />
-                <input
-                  type="text"
-                  name="cardName"
-                  placeholder="Nombre en la tarjeta"
-                  value={formData.cardName}
-                  onChange={handleInputChange}
-                  className="checkout-input"
-                />
+                <input type="text" name="cardNumber" placeholder="Número de tarjeta" value={formData.cardNumber} onChange={handleInputChange} maxLength="19" className="checkout-input" />
+                <input type="text" name="cardName" placeholder="Nombre en la tarjeta" value={formData.cardName} onChange={handleInputChange} className="checkout-input" />
                 <div className="checkout-form-row">
-                  <input
-                    type="text"
-                    name="expiry"
-                    placeholder="MM/AA"
-                    value={formData.expiry}
-                    onChange={handleInputChange}
-                    maxLength="5"
-                    className="checkout-input"
-                  />
-                  <input
-                    type="text"
-                    name="cvv"
-                    placeholder="CVV"
-                    value={formData.cvv}
-                    onChange={handleInputChange}
-                    maxLength="4"
-                    className="checkout-input"
-                  />
+                  <input type="text" name="expiry" placeholder="MM/AA" value={formData.expiry} onChange={handleInputChange} maxLength="5" className="checkout-input" />
+                  <input type="text" name="cvv" placeholder="CVV" value={formData.cvv} onChange={handleInputChange} maxLength="4" className="checkout-input" />
                 </div>
 
                 <button
@@ -199,7 +155,7 @@ export default function Checkout() {
               <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fff', marginBottom: '1.2rem', textTransform: 'uppercase', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)' }}>
                 📦 Resumen del Pedido
               </h2>
-              
+
               <div className="checkout-items-container">
                 {cartItems.map(item => (
                   <div key={item.id} className="checkout-item">
@@ -208,23 +164,10 @@ export default function Checkout() {
                       <h3 className="checkout-item-name">{item.name}</h3>
                       <p className="checkout-item-price">S/ {item.price.toFixed(2)}</p>
                       <div className="checkout-quantity-controls">
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="checkout-qty-btn"
-                        >
-                          −
-                        </button>
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="checkout-qty-btn">−</button>
                         <span className="checkout-quantity">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="checkout-qty-btn"
-                        >
-                          +
-                        </button>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="checkout-remove-btn"
-                        >
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="checkout-qty-btn">+</button>
+                        <button onClick={() => removeItem(item.id)} className="checkout-remove-btn">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -234,22 +177,10 @@ export default function Checkout() {
               </div>
 
               <div className="checkout-summary-details">
-                <div className="checkout-summary-row">
-                  <span>Subtotal</span>
-                  <span>S/ {subtotal.toFixed(2)}</span>
-                </div>
-                <div className="checkout-summary-row">
-                  <span>IGV (18%)</span>
-                  <span>S/ {tax.toFixed(2)}</span>
-                </div>
-                <div className="checkout-summary-row">
-                  <span>Envío</span>
-                  <span>{shipping === 0 ? '🎉 GRATIS' : `S/ ${shipping.toFixed(2)}`}</span>
-                </div>
-                <div className="checkout-total-row">
-                  <span>TOTAL</span>
-                  <span>S/ {total.toFixed(2)}</span>
-                </div>
+                <div className="checkout-summary-row"><span>Subtotal</span><span>S/ {subtotal.toFixed(2)}</span></div>
+                <div className="checkout-summary-row"><span>IGV (18%)</span><span>S/ {tax.toFixed(2)}</span></div>
+                <div className="checkout-summary-row"><span>Envío</span><span>{shipping === 0 ? '🎉 GRATIS' : `S/ ${shipping.toFixed(2)}`}</span></div>
+                <div className="checkout-total-row"><span>TOTAL</span><span>S/ {total.toFixed(2)}</span></div>
               </div>
 
               {shipping > 0 && (
