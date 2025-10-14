@@ -22,6 +22,7 @@ function Home() {
     }, [searchTerm, selectedCategory]);
 
     // Función para agregar al carrito
+
     const addToCart = (product) => {
         setCartItems(prevItems => {
             const existingItem = prevItems.find(item => item.id === product.id);

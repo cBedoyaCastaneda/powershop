@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'src/pages/css/Cart.css';
 
 function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
 
   const calculateTotal = () => {
@@ -12,6 +15,11 @@ function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
     if (e.target.className === 'cart-overlay') {
       onClose();
     }
+  };
+
+  const handleCheckout = () => {
+    onClose(); // Cierra el modal del carrito
+    navigate('/checkout'); // ✅ Con minúscula
   };
 
   return (
@@ -80,7 +88,7 @@ function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
                   <span>Total:</span>
                   <span>${calculateTotal().toFixed(2)}</span>
                 </div>
-                <button className="checkout-btn">
+                <button className="checkout-btn" onClick={handleCheckout}>
                   Proceder al Pago
                 </button>
               </div>

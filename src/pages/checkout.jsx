@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CreditCard, Lock, ShoppingCart, Trash2 } from 'lucide-react'
+import '../pages/checkout.css'
 
 export default function Checkout() {
   const [cartItems, setCartItems] = useState([
@@ -23,7 +24,7 @@ export default function Checkout() {
   const [isProcessing, setIsProcessing] = useState(false)
 
   const handleInputChange = (e) => {
-    const { name, value } = e
+    const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
@@ -39,7 +40,7 @@ export default function Checkout() {
   }
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const tax = subtotal * 0.18 // 18% IGV
+  const tax = subtotal * 0.18
   const shipping = subtotal > 100 ? 0 : 15
   const total = subtotal + tax + shipping
 
@@ -54,46 +55,50 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-slate-800 mb-8 flex items-center gap-3">
-          <ShoppingCart className="text-blue-600" />
-          Finalizar Compra
-        </h1>
+    <>
+      {/* Header */}
+      <div className="checkout-header">
+        <div className="checkout-header-container">
+          <ShoppingCart size={40} style={{ filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.8))' }} />
+          <h1>Finalizar Compra</h1>
+        </div>
+      </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+      {/* Contenedor Principal */}
+      <div className="checkout-container">
+        <div className="checkout-grid">
           {/* Formulario */}
-          <div className="lg:col-span-2 space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Información de Contacto */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-semibold text-slate-800 mb-4">
-                Información de Contacto
+            <div className="checkout-card">
+              <h2 className="checkout-card h2" style={{ marginBottom: '1.2rem' }}>
+                📧 Información de Contacto
               </h2>
-              <div className="space-y-4">
+              <div className="checkout-form-group">
                 <input
                   type="email"
                   name="email"
                   placeholder="Email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="checkout-input"
                 />
               </div>
             </div>
 
             {/* Dirección de Envío */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-semibold text-slate-800 mb-4">
-                Dirección de Envío
+            <div className="checkout-card">
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fff', marginBottom: '1.2rem', textTransform: 'uppercase', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)' }}>
+                📍 Dirección de Envío
               </h2>
-              <div className="space-y-4">
+              <div className="checkout-form-group">
                 <input
                   type="text"
                   name="fullName"
                   placeholder="Nombre completo"
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="checkout-input"
                 />
                 <input
                   type="text"
@@ -101,16 +106,16 @@ export default function Checkout() {
                   placeholder="Dirección"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="checkout-input"
                 />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="checkout-form-row">
                   <input
                     type="text"
                     name="city"
                     placeholder="Ciudad"
                     value={formData.city}
                     onChange={handleInputChange}
-                    className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="checkout-input"
                   />
                   <input
                     type="text"
@@ -118,19 +123,19 @@ export default function Checkout() {
                     placeholder="Código Postal"
                     value={formData.zipCode}
                     onChange={handleInputChange}
-                    className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="checkout-input"
                   />
                 </div>
               </div>
             </div>
 
             {/* Información de Pago */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <CreditCard className="text-blue-600" />
+            <div className="checkout-card">
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fff', marginBottom: '1.2rem', textTransform: 'uppercase', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <CreditCard size={20} />
                 Información de Pago
               </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="checkout-form-group">
                 <input
                   type="text"
                   name="cardNumber"
@@ -138,7 +143,7 @@ export default function Checkout() {
                   value={formData.cardNumber}
                   onChange={handleInputChange}
                   maxLength="19"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="checkout-input"
                 />
                 <input
                   type="text"
@@ -146,9 +151,9 @@ export default function Checkout() {
                   placeholder="Nombre en la tarjeta"
                   value={formData.cardName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="checkout-input"
                 />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="checkout-form-row">
                   <input
                     type="text"
                     name="expiry"
@@ -156,7 +161,7 @@ export default function Checkout() {
                     value={formData.expiry}
                     onChange={handleInputChange}
                     maxLength="5"
-                    className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="checkout-input"
                   />
                   <input
                     type="text"
@@ -165,17 +170,18 @@ export default function Checkout() {
                     value={formData.cvv}
                     onChange={handleInputChange}
                     maxLength="4"
-                    className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="checkout-input"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="checkout-btn-pay"
+                  style={{ opacity: isProcessing ? 0.6 : 1, cursor: isProcessing ? 'not-allowed' : 'pointer' }}
                 >
                   {isProcessing ? (
-                    <>Procesando...</>
+                    <>⏳ Procesando...</>
                   ) : (
                     <>
                       <Lock size={20} />
@@ -188,40 +194,36 @@ export default function Checkout() {
           </div>
 
           {/* Resumen del Pedido */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-md p-6 sticky top-8">
-              <h2 className="text-xl font-semibold text-slate-800 mb-4">
-                Resumen del Pedido
+          <div className="checkout-summary-section">
+            <div className="checkout-summary-card">
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fff', marginBottom: '1.2rem', textTransform: 'uppercase', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)' }}>
+                📦 Resumen del Pedido
               </h2>
               
-              <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
+              <div className="checkout-items-container">
                 {cartItems.map(item => (
-                  <div key={item.id} className="flex gap-3 pb-4 border-b border-slate-200">
-                    <div className="text-4xl">{item.image}</div>
-                    <div className="flex-1">
-                      <h3 className="font-medium text-slate-800 text-sm">
-                        {item.name}
-                      </h3>
-                      <p className="text-slate-600 text-sm">
-                        S/ {item.price.toFixed(2)}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
+                  <div key={item.id} className="checkout-item">
+                    <div className="checkout-item-image">{item.image}</div>
+                    <div className="checkout-item-details">
+                      <h3 className="checkout-item-name">{item.name}</h3>
+                      <p className="checkout-item-price">S/ {item.price.toFixed(2)}</p>
+                      <div className="checkout-quantity-controls">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-sm"
+                          className="checkout-qty-btn"
                         >
-                          -
+                          −
                         </button>
-                        <span className="text-sm w-8 text-center">{item.quantity}</span>
+                        <span className="checkout-quantity">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-sm"
+                          className="checkout-qty-btn"
                         >
                           +
                         </button>
                         <button
                           onClick={() => removeItem(item.id)}
-                          className="ml-auto text-red-500 hover:text-red-700"
+                          className="checkout-remove-btn"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -231,36 +233,34 @@ export default function Checkout() {
                 ))}
               </div>
 
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between text-slate-600">
+              <div className="checkout-summary-details">
+                <div className="checkout-summary-row">
                   <span>Subtotal</span>
                   <span>S/ {subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-slate-600">
+                <div className="checkout-summary-row">
                   <span>IGV (18%)</span>
                   <span>S/ {tax.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-slate-600">
+                <div className="checkout-summary-row">
                   <span>Envío</span>
-                  <span>{shipping === 0 ? 'GRATIS' : `S/ ${shipping.toFixed(2)}`}</span>
+                  <span>{shipping === 0 ? '🎉 GRATIS' : `S/ ${shipping.toFixed(2)}`}</span>
                 </div>
-                <div className="border-t border-slate-300 pt-3">
-                  <div className="flex justify-between text-lg font-bold text-slate-800">
-                    <span>Total</span>
-                    <span>S/ {total.toFixed(2)}</span>
-                  </div>
+                <div className="checkout-total-row">
+                  <span>TOTAL</span>
+                  <span>S/ {total.toFixed(2)}</span>
                 </div>
               </div>
 
               {shipping > 0 && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                  <p>💡 ¡Envío gratis en compras mayores a S/ 100!</p>
+                <div className="checkout-free-shipping">
+                  💡 ¡Envío gratis en compras mayores a S/ 100!
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

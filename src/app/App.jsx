@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Home from "../pages/home.jsx";  // Cambié "Home" por "home.jsx"
 import ProductDetail from "../components/products/productDetail/productDetail.jsx";
+import Checkout from "../pages/checkout.jsx"
 import "./App.css";
 
 function App() {
@@ -46,7 +47,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route
-            path="/"
+            path="/home"
             element={
               <Home
                 cartItems={cartItems}
@@ -60,6 +61,17 @@ function App() {
             path="/product/:id"
             element={
               <ProductDetail
+                cartItems={cartItems}
+                addToCart={addToCart}
+                updateQuantity={updateQuantity}
+                removeItem={removeItem}
+              />
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <Checkout
                 cartItems={cartItems}
                 addToCart={addToCart}
                 updateQuantity={updateQuantity}
