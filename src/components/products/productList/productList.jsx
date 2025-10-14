@@ -1,6 +1,6 @@
 const products = [
     // 🧠 Telekinesis
-    { id: 1, name: 'Guantes Psiónicos', price: 1200, category: 'Telekinesis', image: '🧤', featured: true },
+    { id: 1, name: 'Guantes Psiónicos', price: 1200, category: 'Telekinesis', image: '🧤', featured: false, description: "Descripción opcional del producto" },
     { id: 2, name: 'Casco Mentalis', price: 2200, category: 'Telekinesis', image: '🪖', featured: false },
     { id: 3, name: 'Píldora Psicoactiva', price: 750, category: 'Telekinesis', image: '💊', featured: false },
     { id: 4, name: 'Anillo de Control Mental', price: 1600, category: 'Telekinesis', image: '💍', featured: false },
@@ -10,7 +10,7 @@ const products = [
     { id: 8, name: 'Visor Psíquico', price: 1450, category: 'Telekinesis', image: '👓', featured: false },
 
     // 🔥 Elementales
-    { id: 9, name: 'Guante de Fuego Infernal', price: 1700, category: 'Elementales', image: '🔥', featured: true },
+    { id: 9, name: 'Guante de Fuego Infernal', price: 1700, category: 'Elementales', image: '🔥', featured: false },
     { id: 10, name: 'Botas de Tierra Ancestral', price: 1100, category: 'Elementales', image: '🥾', featured: false },
     { id: 11, name: 'Amuleto del Agua Eterna', price: 2100, category: 'Elementales', image: '💧', featured: false },
     { id: 12, name: 'Báculo de Tormentas', price: 2600, category: 'Elementales', image: '⚡', featured: false },
