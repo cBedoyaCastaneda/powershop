@@ -7,9 +7,12 @@ function Home() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 12;
 
     const categories = ['Todos', 'Telekinesis', 'Elementales', 'Velocidad', 'Fuerza', 'Invisibilidad', 'Teletransportación'];
 
+    // Función para agregar al carrito
     const addToCart = (product) => {
         setCartItems(prevItems => {
             const existingItem = prevItems.find(item => item.id === product.id);
@@ -47,11 +50,46 @@ function Home() {
         return cartItems.reduce((total, item) => total + item.quantity, 0);
     };
 
+    // Filtrar productos
     const filteredProducts = products.filter(product => {
         const matchesCategory = selectedCategory === 'Todos' || product.category === selectedCategory;
         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
     });
+
+    // Calcular páginas
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+    // Obtener productos para la página actual
+    const getCurrentPageProducts = () => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return filteredProducts.slice(startIndex, endIndex);
+    };
+
+    // Cambiar de página
+    const goToPage = (page) => {
+        setCurrentPage(page);
+    };
+
+    // Ir a página anterior
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    // Ir a página siguiente
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    // Resetear a página 1 cuando cambien los filtros
+    useState(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedCategory]);
 
     return (
         <div className="app">
@@ -115,8 +153,17 @@ function Home() {
             <section className="products-section">
                 <div className="container">
                     <h3>Productos Destacados</h3>
+
+                    {/* Información de paginación */}
+                    <div className="pagination-info">
+                        <p>
+                            Mostrando {getCurrentPageProducts().length} de {filteredProducts.length} productos
+                            (Página {currentPage} de {totalPages})
+                        </p>
+                    </div>
+
                     <div className="products-grid">
-                        {filteredProducts.map(product => (
+                        {getCurrentPageProducts().map(product => (
                             <div key={product.id} className="product-card">
                                 <div className="product-image">{product.image}</div>
                                 <div className="product-info">
@@ -133,6 +180,39 @@ function Home() {
                             </div>
                         ))}
                     </div>
+
+                    {/* Controles de paginación */}
+                    {totalPages > 1 && (
+                        <div className="pagination-controls">
+                            <button
+                                className="pagination-btn"
+                                onClick={goToPreviousPage}
+                                disabled={currentPage === 1}
+                            >
+                                ← Anterior
+                            </button>
+
+                            <div className="page-numbers">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                    <button
+                                        key={page}
+                                        className={`page-btn ${currentPage === page ? 'active' : ''}`}
+                                        onClick={() => goToPage(page)}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                className="pagination-btn"
+                                onClick={goToNextPage}
+                                disabled={currentPage === totalPages}
+                            >
+                                Siguiente →
+                            </button>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -150,8 +230,8 @@ function Home() {
                 <div className="container">
                     <div className="footer-content">
                         <div className="footer-section">
-                            <h4>TechStore</h4>
-                            <p>Tu tienda de tecnología de confianza</p>
+                            <h4>PowerShop</h4>
+                            <p>El poder del sol en la palma de tu mano.</p>
                         </div>
                         <div className="footer-section">
                             <h4>Enlaces</h4>
@@ -161,12 +241,12 @@ function Home() {
                         </div>
                         <div className="footer-section">
                             <h4>Contacto</h4>
-                            <p>Email: info@techstore.com</p>
+                            <p>Email: info@powershop.com</p>
                             <p>Tel: +51 123 456 789</p>
                         </div>
                     </div>
                     <div className="footer-bottom">
-                        <p>&copy; 2025 TechStore. Todos los derechos reservados.</p>
+                        <p>&copy; 2025 PowerShop. Todos los derechos reservados.</p>
                     </div>
                 </div>
             </footer>
