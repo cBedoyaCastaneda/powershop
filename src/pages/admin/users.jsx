@@ -1,10 +1,9 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import DataTable from "../../components/admin/DataTable/DataTable";
 import { useUsers } from "../../hooks/api/useUsers";
 import { usePagination } from "../../hooks/usePagination";
 
-export default function Users() {
+export default function AdminUsers() {
   const { loading, users, q, setQ, toggleActive } = useUsers();
   const { data, page, pages, setPage, total } = usePagination(users, 10);
 

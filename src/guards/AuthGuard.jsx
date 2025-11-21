@@ -1,4 +1,5 @@
 import { GetUserLogged } from "../utils/storage";
+import { Navigate } from "react-router-dom";
 
 //Verifica si inicio sesion
 function AuthGuard({ children }) {

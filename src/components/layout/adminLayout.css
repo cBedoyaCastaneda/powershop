@@ -1,0 +1,78 @@
+/* Layout general */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #121212;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+}
+
+/* SIDEBAR */
+.admin-sidebar {
+  width: 220px;
+  background: rgba(20, 20, 20, 0.9); /* oscuro + semitransparente */
+  backdrop-filter: blur(6px);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+/* Navegación */
+.admin-sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-sidebar nav ul li {
+  margin-bottom: 14px;
+}
+
+.admin-sidebar nav ul li a {
+  color: #eaeaea;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 10px 12px;
+  display: block;
+  border-radius: 6px;
+
+  /* efecto hover */
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.admin-sidebar nav ul li a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* CONTENIDO PRINCIPAL */
+.admin-content {
+  flex: 1;
+  padding: 80px;
+  background: rgba(15, 15, 15, 0.85);  /* fondo oscuro + transparencia */
+  backdrop-filter: blur(4px);
+  overflow-y: auto;
+}
+
+/* Scrollbar oscuro limpio */
+.admin-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.admin-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

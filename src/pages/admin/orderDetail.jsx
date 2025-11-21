@@ -1,10 +1,9 @@
-import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { orderService } from "../../services/order.service";
 import { useState, useEffect } from "react";
 import { formatCurrency, formatDate } from "../../utils/formatters";
 
-export default function OrderDetail() {
+export default function AdminOrderDetail() {
   const { id } = useParams();
   const nav = useNavigate();
   const [order, setOrder] = useState(null);

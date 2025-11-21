@@ -10,7 +10,7 @@ function useQuery() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export default function Orders() {
+export default function AdminOrders() {
   const { loading, orders, q, setQ } = useOrders();
   const query = useQuery();
   const userQ = query.get("user") || "";
