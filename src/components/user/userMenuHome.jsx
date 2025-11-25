@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { GetUserLogged } from "../../utils/storage";
+import useLocalStorage from '@hooks/useLocalStorage';
 
 function UserMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const [userLogged, setUserLogged] = useState(null);
   const navigate = useNavigate();
-  
+  const {GetUserLogged} = useLocalStorage()
   // Cerrar menú cuando se hace clic fuera
   useEffect(() => {
     setUserLogged(GetUserLogged())

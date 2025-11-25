@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCart } from '../../../hooks/useCart.jsx';
+import { useCart } from '../../../hooks/useCart.js';
 import products from "../productList/productList.jsx";
 
 function ProductDetail() {

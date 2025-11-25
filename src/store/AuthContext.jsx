@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
   const logout = () => setUser(null);
 
   const value = useMemo(() => ({
-    user, isAuthenticated: !!user, isAdmin: user?.role === "admin", login, logout
+    user, isAuthenticated: !!user, isAdmin: user?.tipo === "administrador", login, logout
   }), [user]);
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;

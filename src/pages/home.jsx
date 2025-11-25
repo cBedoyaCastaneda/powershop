@@ -3,7 +3,7 @@ import products from "../components/products/productList/productList.jsx";
 import CartDrawer from "../components/cart/cartDrawer/cartDrawer.jsx";
 import categories from "./category.jsx";
 import UserMenu from '../components/user/userMenuHome.jsx';
-import { useCart } from '../hooks/useCart.jsx';
+import { useCart } from '../hooks/useCart.js';
 
 
 function Home() {
