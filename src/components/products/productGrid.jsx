@@ -1,12 +1,11 @@
 import ProductCard from "./productCard";
 
-export default function ProductGrid({getCurrentPageProducts}) {
+export default function ProductGrid({getCurrentPageProducts,addToCart}) {
     const products = getCurrentPageProducts()
-    console.log(products)
     return (
     <div className="products-grid">
         {products.map((p) => (
-          <ProductCard key={p.id} product={p}/>
+          <ProductCard key={p.id} product={p} addToCart={addToCart}/>
       ))}
     </div>)
 }

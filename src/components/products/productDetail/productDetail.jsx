@@ -198,7 +198,7 @@ function ProductDetail() {
 
             {/* Botón Volver */}
             <div className="back-button-container">
-                <button className="back-button" onClick={() => navigate('/')}>
+                <button className="mini-cta-btn" onClick={() => navigate('/')}>
                     ← Volver a la tienda
                 </button>
             </div>

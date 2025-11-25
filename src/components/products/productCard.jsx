@@ -1,4 +1,8 @@
-export default function ProductCard({product}) {    
+import { useNavigate } from "react-router-dom"
+
+
+export default function ProductCard({product, addToCart}) {
+    const navigate = useNavigate()
     return (<div className="product-card">
         {product.featured && <div className="featured-badge">Destacado</div>}
         <div className="product-image">{product.image}</div>
@@ -11,6 +15,12 @@ export default function ProductCard({product}) {
                 onClick={() => addToCart(product)}
             >
                 Agregar al Carrito
+            </button>
+            <button
+                className="mini-cta-btn"
+                onClick={() => navigate( `product/${product.id}` )}
+            >
+                Ver informacion
             </button>
         </div>
     </div>)

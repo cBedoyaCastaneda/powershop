@@ -167,7 +167,7 @@ function Home() {
                     </div>
 
                     {/* El Grid y las Cards de los productos, aun funciona con la barra */}
-                    <ProductGrid getCurrentPageProducts={getCurrentPageProducts}/>
+                    <ProductGrid getCurrentPageProducts={getCurrentPageProducts} addToCart={addToCart}/>
 
                     {/* Controles de paginación */}
                     {totalPages > 1 && (
