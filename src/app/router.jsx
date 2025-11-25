@@ -1,23 +1,24 @@
 // ...importaciones previas
-import { createBrowserRouter } from "react-router-dom";
 import AdminLayout from "@components/layout/adminLayout";
 import MainLayout from "@components/layout/mainLayout";
-import Home from "@pages/home"
-import Login from "@pages/login"
-import AdminUsers from "@pages/admin/users";
-import AdminOrders from "@pages/admin/orders";
 import ProductDetail from "@components/products/productDetail/productDetail";
+import AdminGuard from "@guards/AdminGuard";
+import AdminCategories from "@pages/admin/categories";
+import AdminDashboard from "@pages/admin/dashboard";
+import AdminOrderDetail from "@pages/admin/orderDetail";
+import AdminOrders from "@pages/admin/orders";
+import AdminProductEdit from "@pages/admin/productEdit";
+import AdminProducts from "@pages/admin/products";
+import AdminUsers from "@pages/admin/users";
+import UsersRegistered from "@pages/admin/usersRegistered";
 import Checkout from "@pages/checkout";
-import Registro from "@pages/register";
 import RecuperarContraseña from "@pages/forgotPassword";
+import Home from "@pages/home";
+import Login from "@pages/login";
 import NotFound from "@pages/notFound";
 import OrderSuccess from "@pages/orderSuccess";
-import AdminOrderDetail from "@pages/admin/orderDetail";
-import AdminProducts from "@pages/admin/products";
-import AdminProductEdit from "@pages/admin/productEdit";
-import AdminDashboard from "@pages/admin/dashboard";
-import AdminCategories from "@pages/admin/categories";
-import AdminGuard from "@guards/AdminGuard";
+import Registro from "@pages/register";
+import { createBrowserRouter } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
       { path: "", element: <AdminDashboard /> },
       { path: "dashboard", element: <AdminDashboard /> },
       { path: "users", element: <AdminUsers /> },
+      { path: "usersRegistered", element: <UsersRegistered /> },
       { path: "categories", element: <AdminCategories /> },
       { path: "orders", element: <AdminOrders /> },
       { path: "orders/:id", element: <AdminOrderDetail /> },

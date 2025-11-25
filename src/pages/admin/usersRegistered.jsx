@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LS_REGISTERED = "ps_registered_users_v1";
@@ -48,7 +48,7 @@ export default function UsersRegistered() {
         <h1 style={{ fontSize: "32px" }}>Usuarios registrados</h1>
 
         <button
-          onClick={() => navigate("/adminUsuarios")}
+          onClick={() => navigate("/admin/users")}
           style={{
             padding: "8px 14px",
             borderRadius: "999px",

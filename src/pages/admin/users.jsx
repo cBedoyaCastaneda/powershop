@@ -1,8 +1,6 @@
-import { Link } from "react-router-dom";
-import DataTable from "../../components/admin/DataTable/DataTable";
+import { Link, useNavigate } from "react-router-dom";
 import { useUsers } from "../../hooks/api/useUsers";
 import { usePagination } from "../../hooks/usePagination";
-import { useNavigate } from "react-router-dom";
 
 
 export default function AdminUsers() {
@@ -29,7 +27,7 @@ export default function AdminUsers() {
         <h1 style={{ fontSize: "32px" }}>Usuarios con Orden</h1>
 
         <button
-          onClick={() => navigate("/adminUsuariosRegistrados")}
+          onClick={() => navigate("/admin/usersRegistered")}
           style={{
             padding: "8px 14px",
             borderRadius: "999px",
