@@ -15,17 +15,81 @@ const ensureUsers = () => {
   return JSON.parse(raw);
 };
 
+const saveUsers = (users) => {
+  localStorage.setItem(LS_USERS, JSON.stringify(users));
+};
+
+// pequeña ayuda para separar el nombre completo
+const splitFullName = (fullName = "") => {
+  const parts = fullName.trim().split(" ").filter(Boolean);
+  if (parts.length === 0) return { name: "", lastName: "" };
+  const [name, ...rest] = parts;
+  return { name, lastName: rest.join(" ") };
+};
+
 export const userService = {
   list() {
     return Promise.resolve(ensureUsers());
   },
+
   getById(id) {
     const users = ensureUsers();
     return Promise.resolve(users.find(u => u.id === id) || null);
   },
+
   toggleActive(id) {
     const users = ensureUsers().map(u => (u.id === id ? { ...u, active: !u.active } : u));
-    localStorage.setItem(LS_USERS, JSON.stringify(users));
+    saveUsers(users);
     return Promise.resolve(users.find(u => u.id === id));
+  },
+
+  // 🔹 NUEVO: crear o actualizar usuario a partir del formulario de checkout
+  createOrUpdateFromCheckout(formData) {
+    const users = ensureUsers();
+
+    const email = (formData.email || "").trim().toLowerCase();
+    const { name, lastName } = splitFullName(formData.fullName || "");
+
+    const index = users.findIndex(
+      u => (u.email || "").toLowerCase() === email
+    );
+
+    let updatedUsers;
+
+    if (index !== -1) {
+      // ya existe usuario con ese email → actualizamos datos básicos
+      updatedUsers = users.map((u, i) =>
+        i === index
+          ? {
+              ...u,
+              name: name || u.name,
+              lastName: lastName || u.lastName,
+              address: formData.address,
+              city: formData.city,
+              zipCode: formData.zipCode
+            }
+          : u
+      );
+    } else {
+      // no existe → creamos un nuevo usuario
+      const newUser = {
+        id: `u${users.length + 1}`,
+        name: name || "Cliente",
+        lastName: lastName,
+        email: formData.email,
+        active: true,
+        createdAt: new Date().toISOString().slice(0, 10),
+        address: formData.address,
+        city: formData.city,
+        zipCode: formData.zipCode
+      };
+      updatedUsers = [...users, newUser];
+    }
+
+    saveUsers(updatedUsers);
+
+    return Promise.resolve(
+      updatedUsers.find(u => (u.email || "").toLowerCase() === email)
+    );
   }
 };

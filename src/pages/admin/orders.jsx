@@ -1,53 +1,132 @@
-import React, { useMemo } from "react";
-import { Link, useLocation } from "react-router-dom";
-import DataTable from "../../components/admin/DataTable/DataTable";
-import { useOrders } from "../../hooks/api/useOrders";
-import { usePagination } from "../../hooks/usePagination";
-import { formatCurrency, formatDate } from "../../utils/formatters";
 
-function useQuery() {
-  const { search } = useLocation();
-  return useMemo(() => new URLSearchParams(search), [search]);
-}
+import { useEffect, useState } from "react";
+import { orderService } from "../../services/order.service";
+import { Link } from "react-router-dom";
 
-export default function Orders() {
-  const { loading, orders, q, setQ } = useOrders();
-  const query = useQuery();
-  const userQ = query.get("user") || "";
-  const filtered = useMemo(() => {
-    if (!userQ) return orders;
-    return orders.filter(o => o.userId === userQ);
-  }, [orders, userQ]);
+const Orders = () => {
+  const [orders, setOrders] = useState([]);
+  const [filter, setFilter] = useState("");
 
-  const { data, page, pages, setPage, total } = usePagination(filtered, 10);
+  const loadOrders = async () => {
+    const all = await orderService.list();
+    setOrders(all);
+  };
 
-  const columns = [
-    { header: "ID", render: (r) => <Link to={`/admin/orders/${r.id}`}>{r.id}</Link> },
-    { header: "Usuario", accessor: "userId" },
-    { header: "Fecha", render: (r) => formatDate(r.createdAt) },
-    { header: "Estado", accessor: "status" },
-    { header: "Total", render: (r) => formatCurrency(r.totals?.grand) }
-  ];
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const handleCancel = async (id) => {
+    await orderService.cancel(id);
+    await loadOrders();
+  };
+
+  const filtered = orders.filter((o) => {
+    const text = `${o.id} ${o.status} ${o.userEmail || ""}`.toLowerCase();
+    return text.includes(filter.toLowerCase());
+  });
 
   return (
-    <div>
-      <h1>Órdenes</h1>
+    <div style={{ padding: "40px", color: "#fff" }}>
+      <h1 style={{ fontSize: "32px", marginBottom: "20px" }}>Órdenes</h1>
+
       <input
-        placeholder="Filtrar por ID / estado / userId"
-        value={q}
-        onChange={(e) => { setQ(e.target.value); setPage(1); }}
+        type="text"
+        placeholder="Filtrar por ID / estado / user"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        style={{
+          marginBottom: "15px",
+          padding: "6px 10px",
+          borderRadius: "6px",
+          border: "1px solid #888",
+          minWidth: "260px"
+        }}
       />
-      {loading ? <p>Cargando...</p> : (
-        <>
-          <DataTable columns={columns} rows={data} empty="No hay órdenes" />
-          <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-            {Array.from({ length: pages }, (_, i) => i + 1).map(n => (
-              <button key={n} disabled={n === page} onClick={() => setPage(n)}>{n}</button>
-            ))}
-            <span style={{ marginLeft: "auto" }}>Total: {total}</span>
-          </div>
-        </>
-      )}
+
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          background: "rgba(0,0,0,0.2)"
+        }}
+      >
+        <thead>
+          <tr>
+            <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>
+              ID
+            </th>
+            <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>
+              Usuario (email)
+            </th>
+            <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>
+              Fecha
+            </th>
+            <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>
+              Estado
+            </th>
+            <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>
+              Total
+            </th>
+            <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map((o) => (
+            <tr key={o.id}>
+              <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
+                <Link
+                  to={`/adminOrdenes/${o.id}`}
+                  style={{ color: "#4fd1ff", textDecoration: "underline" }}
+                >
+                  {o.id}
+                </Link>
+              </td>
+              <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
+                {o.userEmail}
+              </td>
+              <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
+                {o.createdAt}
+              </td>
+              <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
+                {o.status}
+              </td>
+              <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
+                S/ {o.totals?.total?.toFixed(2) ?? "0.00"}
+              </td>
+              <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
+                {o.status !== "CANCELLED" && (
+                  <button
+                    onClick={() => handleCancel(o.id)}
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: "#ff4b6e",
+                      color: "#fff",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+
+          {filtered.length === 0 && (
+            <tr>
+              <td colSpan="6" style={{ padding: "12px", textAlign: "center" }}>
+                No hay órdenes registradas
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
-}
+};
+
+export default Orders;

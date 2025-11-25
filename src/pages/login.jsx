@@ -3,6 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import usuarios from '../components/user/users-list';
 import './login.css';
 
+const LS_REGISTERED = 'ps_registered_users_v1';
+
+const getRegisteredUsers = () => {
+  const raw = localStorage.getItem(LS_REGISTERED);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+};
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [contraseña, setContraseña] = useState('');
@@ -14,9 +26,23 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    const usuario = usuarios.find(
+    const registrados = getRegisteredUsers();
+
+    const userRegistrado = registrados.find(
+      (u) =>
+        u.active !== false &&                           // solo activos
+        (u.username || '').toLowerCase() ===            // username del registro
+          email.trim().toLowerCase() &&
+        u.password === contraseña                       // contraseña del registro
+    );
+
+    // 2️⃣ Usuario base (Sebastian) desde users-list.jsx
+    const userBase = usuarios.find(
       (u) => u.name === email && u.contraseña === contraseña
     );
+
+    // 3️⃣ Si encuentra alguno de los dos, iniciar sesión
+    const usuario = userRegistrado || userBase;
 
     if (usuario) {
       localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));

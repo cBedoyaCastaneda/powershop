@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { CreditCard, Lock, ShoppingCart, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { userService } from '../services/user.service'
+import { orderService } from "../services/order.service";
+
 import '../pages/checkout.css'
 
 export default function Checkout() {
@@ -47,26 +50,45 @@ export default function Checkout() {
   const shipping = subtotal > 100 ? 0 : 15
   const total = subtotal + tax + shipping
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setIsProcessing(true)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
 
-    // 🔹 Guardar en sessionStorage
+  // 1) Crear / actualizar usuario a partir del formulario
+  const user = await userService.createOrUpdateFromCheckout(formData);
+
+    // 2) Resumen que ya usas en Compra-Finalizada
+    const summary = { subtotal, tax, shipping, total };
+
     const checkoutData = {
       cartItems,
       formData,
-      summary: { subtotal, tax, shipping, total },
+      summary,
       date: new Date().toLocaleString()
-    }
+    };
 
-    sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData))
+    // 3) Guardar en sessionStorage (para la página Compra-Finalizada)
+    sessionStorage.setItem("checkoutData", JSON.stringify(checkoutData));
 
-    // 🔹 Simular proceso de pago y redirigir
+    // 4) Crear orden para el ADMIN
+    await orderService.createFromCheckout({
+      userId: user?.id || "guest",
+      userEmail: user?.email || formData.email,
+      fullName: formData.fullName,
+      address: formData.address,
+      city: formData.city,
+      zipCode: formData.zipCode,
+      email: formData.email,
+      cartItems,
+      summary
+    });
+
+    // 5) Simular procesamiento de pago y redirigir
     setTimeout(() => {
-      setIsProcessing(false)
-      navigate('/Compra-Finalizada')
-    }, 2000)
-  }
+      setIsProcessing(false);
+      navigate("/Compra-Finalizada");
+    }, 2000);
+  };
 
   return (
     <>

@@ -7,42 +7,121 @@ const ensureOrders = () => {
       {
         id: "o1",
         userId: "u1",
+        userEmail: "ana@site.com",
         status: "CREATED",
-        createdAt: "2025-10-10",
-        items: [
-          { productId: "p1", name: "Auriculares Pro", qty: 1, price: 199 },
-          { productId: "p2", name: "Mouse Gamer", qty: 2, price: 59 }
-        ],
-        totals: { subtotal: 317, shipping: 10, grand: 327 }
+        createdAt: "07/10/2025",
+        items: [],
+        totals: {
+          subtotal: 0,
+          igv: 0,
+          shipping: 0,
+          total: 0
+        },
+        shipping: {
+          fullName: "",
+          address: "",
+          city: "",
+          zipCode: "",
+          email: ""
+        }
       },
       {
         id: "o2",
         userId: "u3",
+        userEmail: "carmen@site.com",
         status: "PAID",
-        createdAt: "2025-10-11",
-        items: [{ productId: "p2", name: "Mouse Gamer", qty: 1, price: 59 }],
-        totals: { subtotal: 59, shipping: 10, grand: 69 }
+        createdAt: "07/10/2025",
+        items: [],
+        totals: {
+          subtotal: 0,
+          igv: 0,
+          shipping: 0,
+          total: 0
+        },
+        shipping: {
+          fullName: "",
+          address: "",
+          city: "",
+          zipCode: "",
+          email: ""
+        }
       }
     ];
+
     localStorage.setItem(LS_ORDERS, JSON.stringify(seed));
     return seed;
   }
   return JSON.parse(raw);
 };
 
-const save = (orders) => localStorage.setItem(LS_ORDERS, JSON.stringify(orders));
+const saveOrders = (orders) => {
+  localStorage.setItem(LS_ORDERS, JSON.stringify(orders));
+};
 
 export const orderService = {
   list() {
     return Promise.resolve(ensureOrders());
   },
+
   getById(id) {
     const orders = ensureOrders();
-    return Promise.resolve(orders.find(o => o.id === id) || null);
+    return Promise.resolve(orders.find((o) => o.id === id) || null);
   },
+
   cancel(id) {
-    const orders = ensureOrders().map(o => (o.id === id ? { ...o, status: "CANCELLED" } : o));
-    save(orders);
-    return Promise.resolve(orders.find(o => o.id === id));
+    const orders = ensureOrders().map((o) =>
+      o.id === id ? { ...o, status: "CANCELLED" } : o
+    );
+    saveOrders(orders);
+    return Promise.resolve(orders.find((o) => o.id === id) || null);
+  },
+
+  // 🔹 Crear una orden nueva desde el checkout
+  createFromCheckout({
+    userId,
+    userEmail,
+    fullName,
+    address,
+    city,
+    zipCode,
+    email,
+    cartItems,
+    summary
+  }) {
+    const orders = ensureOrders();
+
+    const newId = `o${orders.length + 1}`;
+
+    const newOrder = {
+      id: newId,
+      userId,
+      userEmail,
+      status: "PAID",
+      createdAt: new Date().toLocaleString(),
+      items: cartItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        subtotal: item.price * item.quantity
+      })),
+      totals: {
+        subtotal: summary.subtotal,
+        igv: summary.tax,
+        shipping: summary.shipping,
+        total: summary.total
+      },
+      shipping: {
+        fullName,
+        address,
+        city,
+        zipCode,
+        email
+      }
+    };
+
+    const updated = [...orders, newOrder];
+    saveOrders(updated);
+    return Promise.resolve(newOrder);
   }
 };

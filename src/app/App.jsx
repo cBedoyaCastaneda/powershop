@@ -9,6 +9,18 @@ import RecuperarContraseña from '../pages/forgotPassword';
 import CompraFinalizada from '../pages/orderSuccess';
 import "./App.css";
 
+//Agregando
+import Users from "../pages/admin/users.jsx";
+import Orders from "../pages/admin/orders.jsx";
+import OrderDetail from "../pages/admin/orderDetail.jsx";
+import UsersRegistered from "../pages/admin/usersRegistered.jsx";
+import UserDetail from "../pages/admin/userDetail.jsx";
+
+
+import { Outlet } from "react-router-dom";
+import { AuthProvider } from "../store/AuthContext";
+
+
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -105,6 +117,16 @@ function App() {
 
           <Route path="/Compra-Finalizada" element={<CompraFinalizada />} />
 
+          {/*"Agregando"*/}
+          <Route path="/adminUsuarios" element={<Users />} />
+
+          <Route path="/adminUsuarios/:id" element={<UserDetail />} />
+
+          <Route path="/adminOrdenes" element={<Orders />} />
+
+          <Route path="/adminOrdenes/:id" element={<OrderDetail />} />
+
+          <Route path="/adminUsuariosRegistrados" element={<UsersRegistered />} />
         </Routes>
       </div>
     </Router>
@@ -112,3 +134,12 @@ function App() {
 }
 
 export default App;
+
+export function App1() {
+  return (
+    <AuthProvider>
+      {/* aquí va tu MainLayout / Header / Footer si aplica */}
+      <Outlet />
+    </AuthProvider>
+  );
+}
