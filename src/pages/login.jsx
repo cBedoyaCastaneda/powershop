@@ -33,13 +33,13 @@ export default function Login() {
       (u) =>
         u.active !== false &&                           // solo activos
         (u.username || '').toLowerCase() ===            // username del registro
-          email.trim().toLowerCase() &&
+          user.trim().toLowerCase() &&
         u.password === contraseña                       // contraseña del registro
     );
 
     // 2️⃣ Usuario base (Sebastian) desde users-list.jsx
     const userBase = usuarios.find(
-      (u) => u.name === email && u.contraseña === contraseña
+      (u) => u.user === user && u.contraseña === contraseña
     );
 
     // 3️⃣ Si encuentra alguno de los dos, iniciar sesión

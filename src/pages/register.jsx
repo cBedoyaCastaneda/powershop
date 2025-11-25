@@ -65,7 +65,7 @@ export default function Registro() {
 
     // Revisar usuarios base (archivo users-list) – opcional
     const usuarioExistenteBase = usuarios.find(
-      (u) => (u.email || '').toLowerCase() === formData.email.toLowerCase()
+      (u) => (u.user || '').toLowerCase() === formData.user.toLowerCase()
     );
     if (usuarioExistenteBase) {
       setError('Este usuario ya está registrado (lista base)');
@@ -75,7 +75,7 @@ export default function Registro() {
     // Revisar usuarios registrados en localStorage
     const registrados = getRegisteredUsers();
     const usuarioExistente = registrados.find(
-      (u) => u.username.toLowerCase() === formData.email.toLowerCase()
+      (u) => u.username.toLowerCase() === formData.user.toLowerCase()
     );
     if (usuarioExistente) {
       setError('Este usuario ya está registrado');
@@ -86,7 +86,7 @@ export default function Registro() {
       id: `r${registrados.length + 1}`,
       name: formData.name,
       lastname: formData.lastname,
-      username: formData.email,       // campo "Usuario" del formulario
+      username: formData.user,       // campo "Usuario" del formulario
       password: formData.contraseña,  // guardamos la contraseña tal cual (solo para la demo)
       active: true,
       createdAt: new Date().toISOString(),
