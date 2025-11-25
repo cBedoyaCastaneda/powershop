@@ -10,6 +10,7 @@ import ProductDetail from "@components/products/productDetail/productDetail";
 import Checkout from "@pages/checkout";
 import Registro from "@pages/register";
 import RecuperarContraseña from "@pages/forgotPassword";
+import NotFound from "@pages/notFound";
 import OrderSuccess from "@pages/orderSuccess";
 import AdminOrderDetail from "@pages/admin/orderDetail";
 import AdminProducts from "@pages/admin/products";
@@ -17,8 +18,6 @@ import AdminProductEdit from "@pages/admin/productEdit";
 import AdminDashboard from "@pages/admin/dashboard";
 import AdminCategories from "@pages/admin/categories";
 import AdminGuard from "@guards/AdminGuard";
-import GuestGuard from "@guards/GuestGuard"
-import AuthGuard from "@guards/AuthGuard"
 
 const router = createBrowserRouter([
   {
@@ -48,7 +47,8 @@ const router = createBrowserRouter([
       { path: "recuperar-contraseña", element:<RecuperarContraseña />},
       { path: "product/:id", element:<ProductDetail />},
       { path: "checkout", element:<Checkout />},
-      { path: "compra-finalizada", element:<OrderSuccess />}
+      { path: "compra-finalizada", element:<OrderSuccess />},
+      { path: "*", element:<NotFound />}
     ]
   },
   {
@@ -66,7 +66,8 @@ const router = createBrowserRouter([
       { path: "orders", element: <AdminOrders /> },
       { path: "orders/:id", element: <AdminOrderDetail /> },
       { path: "products", element: <AdminProducts /> },
-      { path: "products/:id", element: <AdminProductEdit /> }
+      { path: "products/:id", element: <AdminProductEdit /> },
+      { path: "*", element:<NotFound />}
     ]
   }
 ])

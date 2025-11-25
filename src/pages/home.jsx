@@ -88,7 +88,7 @@ function Home() {
 
                     <nav className="nav">
                         <a href="#" className="nav-link">Inicio</a>
-                        <a href="#" className="nav-link">Ofertas</a>
+                        <a href="#ofertas" className="nav-link">Ofertas</a>
                         <UserMenu/>
                         <button className="cart-btn" onClick={() => setIsCartOpen(true)}>
                             🛒 <span className="cart-badge">{getTotalItems()}</span>
@@ -103,6 +103,7 @@ function Home() {
                     <h2>Las Mejores Ofertas en Superpoderes!</h2>
                     <p>Atrévete a ver el mundo con una perspectiva que no imaginas!</p>
                     <button className="cta-btn">Ver Ofertas</button>
+                    <p id='ofertas'></p>
                 </div>
             </section>
 
