@@ -1,9 +1,6 @@
 const express = require("express");
 const app = express();
-const sequelize = require("./database.js")
-const User = require("./models/user.js")
-const Category = require("./models/category.js")
-const Product = require("./models/product.js")
+const {Category,Product,User} = require("./models")
 
 // USERS
 app.get("/users", async (req, res) => {
