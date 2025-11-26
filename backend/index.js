@@ -1,40 +1,56 @@
-require("dotenv").config();
 const express = require("express");
-const mysql = require("mysql2");
-
 const app = express();
-app.use(express.json());
+const sequelize = require("./database.js")
+const User = require("./models/user.js")
+const Category = require("./models/category.js")
+const Product = require("./models/product.js")
 
-// Crear conexión MySQL
-const connection = require('./db');
-
-
-// Probar conexión
-connection.connect((err) => {
-    if (err) {
-        console.error("❌ Error conectando a MySQL:", err);
-        return;
-    }
-    console.log("✅ Conectado a MySQL en Railway");
+// USERS
+app.get("/users", async (req, res) => {
+  const data = await User.findAll();
+  res.json(data);
 });
 
-// Hacer la conexión accesible globalmente
-global.db = connection;
-
-// Importar rutas
-const productosRoutes = require("./routes/products");
-
-// Usar rutas
-app.use("/", productosRoutes);
-
-// Ejemplo de consulta
-connection.query("SELECT NOW() AS fecha", (err, results) => {
-    if (err) throw err;
-    console.log("Resultado de ejemplo:", results[0]);
+app.post("/users", async (req, res) => {
+  const newUser = await User.create(req.body);
+  res.json(newUser);
 });
 
-// Inicializar servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
+// CATEGORIES
+app.get("/categories", async (req, res) => {
+  const data = await Category.findAll();
+  res.json(data);
 });
+
+app.post("/categories", async (req, res) => {
+  const newCategory = await Category.create(req.body);
+  res.json(newCategory);
+});
+
+// PRODUCTS
+app.get("/products", async (req, res) => {
+  const data = await Product.findAll({
+    include: Category // para traer categoría
+  });
+  res.json(data);
+});
+
+app.post("/products", async (req, res) => {
+  const newProduct = await Product.create(req.body);
+  res.json(newProduct);
+});
+
+// ------------------------ INICIO -------------------------
+async function start() {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync(); // crea tablas si no existen
+    console.log("Conectado a MySQL");
+
+    app.listen(3000, () => console.log("Servidor en puerto 3000"));
+  } catch (err) {
+    console.error("Error:", err);
+  }
+}
+
+start();
