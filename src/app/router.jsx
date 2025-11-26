@@ -15,6 +15,7 @@ import RecuperarContraseña from "@pages/forgotPassword";
 import Home from "@pages/home";
 import Login from "@pages/login";
 import NotFound from "@pages/notFound";
+import Unauthorized from "@pages/unauthorized";
 import OrderSuccess from "@pages/orderSuccess";
 import Registro from "@pages/register";
 import { createBrowserRouter } from "react-router-dom";
@@ -31,7 +32,8 @@ const router = createBrowserRouter([
       { path: "login", element:<Login />},
       { path: "registro", element:<Registro />},
       { path: "recuperar-contraseña", element:<RecuperarContraseña />},
-      { path: "product/:id", element:<ProductDetail />}
+      { path: "product/:id", element:<ProductDetail />},
+      { path: "*", element:<NotFound />}
     ]
   },
   {
@@ -63,7 +65,7 @@ const router = createBrowserRouter([
       { path: "orders/:id", element: <AdminOrderDetail /> },
       { path: "products", element: <AdminProducts /> },
       { path: "products/:id", element: <AdminProductEdit /> },
-      { path: "*", element:<NotFound />}
+      { path: "*", element:<Unauthorized />}
     ]
   }
 ])
