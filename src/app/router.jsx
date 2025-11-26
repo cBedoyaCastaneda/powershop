@@ -19,6 +19,7 @@ import NotFound from "@pages/notFound";
 import OrderSuccess from "@pages/orderSuccess";
 import Registro from "@pages/register";
 import { createBrowserRouter } from "react-router-dom";
+import AdminUsersDetail from "../pages/admin/userDetail";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
       { path: "", element: <AdminDashboard /> },
       { path: "dashboard", element: <AdminDashboard /> },
       { path: "users", element: <AdminUsers /> },
+      { path: "users/:id", element: <AdminUsersDetail /> },
       { path: "usersRegistered", element: <UsersRegistered /> },
       { path: "categories", element: <AdminCategories /> },
       { path: "orders", element: <AdminOrders /> },
