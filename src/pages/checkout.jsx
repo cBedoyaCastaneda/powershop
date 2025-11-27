@@ -1,21 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CreditCard, Lock, ShoppingCart, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { userService } from '../services/user.service'
-import { orderService } from "../services/order.service";
+import { orderService } from '../services/order.service'
 import { useCart } from '../hooks/useCart'
 import '../pages/checkout.css'
 
 export default function Checkout() {
-  // Función para el carrito
-  const { cartItems, updateQuantity, removeItem } = useCart();
-  const navigate = useNavigate()
-
-  // const [cartItems, setCartItems] = useState([
-  //   { id: 1, name: 'Laptop Pro 15"', price: 1299.99, quantity: 1, image: '💻' },
-  //   { id: 2, name: 'Mouse Inalámbrico', price: 29.99, quantity: 2, image: '🖱️' },
-  //   { id: 3, name: 'Teclado Mecánico', price: 89.99, quantity: 1, image: '⌨️' }
-  // ])
+  const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -27,58 +20,155 @@ export default function Checkout() {
     cardName: '',
     expiry: '',
     cvv: ''
-  })
+  });
 
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Cargar datos del checkout desde localStorage si existen
+  useEffect(() => {
+    const savedCheckoutData = localStorage.getItem('checkoutData');
+    if (savedCheckoutData) {
+      const data = JSON.parse(savedCheckoutData);
+      // Puedes pre-llenar el formulario si lo deseas
+    }
+  }, []);
+
+  // Redirigir si el carrito está vacío
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      // Pequeño delay para evitar render durante navegación
+      const timer = setTimeout(() => {
+        navigate('/');
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [cartItems, navigate]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setError(null); // Limpiar error al editar
+  };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const tax = subtotal * 0.18
-  const shipping = subtotal > 100 ? 0 : 15
-  const total = subtotal + tax + shipping
+  // Cálculos - Asegurar que price sea número y manejar arrays vacíos
+  const subtotal = cartItems && cartItems.length > 0 
+    ? cartItems.reduce((sum, item) => {
+        const price = parseFloat(item.price) || 0;
+        const quantity = parseInt(item.quantity) || 0;
+        return sum + (price * quantity);
+      }, 0)
+    : 0;
+    
+  const tax = subtotal * 0.18;
+  const shipping = subtotal > 100 ? 0 : 15;
+  const total = subtotal + tax + shipping;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
+    setError(null);
 
-  // 1) Crear / actualizar usuario a partir del formulario
-  const user = await userService.createOrUpdateFromCheckout(formData);
+    try {
+      // 1. Validar que todos los campos estén completos
+      if (!formData.email || !formData.fullName || !formData.address || 
+          !formData.city || !formData.zipCode || !formData.cardNumber || 
+          !formData.cardName || !formData.expiry || !formData.cvv) {
+        throw new Error('Por favor completa todos los campos');
+      }
 
-    // 2) Resumen que ya usas en Compra-Finalizada
-    const summary = { subtotal, tax, shipping, total };
+      // 2. Crear o actualizar usuario
+      let user;
+      try {
+        user = await userService.createOrUpdateFromCheckout(formData);
+      } catch (userError) {
+        console.error('Error al crear usuario:', userError);
+        // Si falla la creación del usuario, continuar como invitado
+        user = { id: null, email: formData.email };
+      }
 
-    const checkoutData = {
-      cartItems,
-      formData,
-      summary,
-      date: new Date().toLocaleString()
-    };
+      // 3. Preparar items para la orden (formato requerido por la API)
+      const orderItems = cartItems.map(item => ({
+        productoId: item.id,
+        cantidad: item.quantity
+      }));
 
-    // 3) Guardar en sessionStorage (para la página Compra-Finalizada)
-    sessionStorage.setItem("checkoutData", JSON.stringify(checkoutData));
+      console.log('Creando orden con items:', orderItems);
 
-    // 4) Crear orden para el ADMIN
-    await orderService.createFromCheckout({
-      userId: user?.id || "guest",
-      userEmail: user?.email || formData.email,
-      fullName: formData.fullName,
-      address: formData.address,
-      city: formData.city,
-      zipCode: formData.zipCode,
-      email: formData.email,
-      cartItems,
-      summary
-    });
+      // 4. Crear la orden en la base de datos usando el servicio
+      const orderData = await orderService.createFromCheckout({
+        userId: user?.id || 1,
+        cartItems
+      });
+      console.log('Orden creada exitosamente:', orderData);
 
-    // 5) Simular procesamiento de pago y redirigir
-    setTimeout(() => {
-      setIsProcessing(false)
-      navigate('/compra-finalizada')
-    }, 2000)
+      // 5. Preparar resumen de compra
+      const summary = { 
+        subtotal: parseFloat(subtotal.toFixed(2)), 
+        tax: parseFloat(tax.toFixed(2)), 
+        shipping: parseFloat(shipping.toFixed(2)), 
+        total: parseFloat(total.toFixed(2))
+      };
+
+      console.log('Summary calculado:', summary);
+
+      // 6. Datos completos para la página de confirmación
+      const checkoutData = {
+        orderNumber: orderData.orden?.id || `ORD-${Date.now()}`,
+        orderDetails: orderData.orden,
+        cartItems,
+        formData: {
+          email: formData.email,
+          fullName: formData.fullName,
+          address: formData.address,
+          city: formData.city,
+          zipCode: formData.zipCode
+        },
+        summary,
+        date: new Date().toLocaleString(),
+        status: 'completed'
+      };
+
+      // 7. Guardar en sessionStorage (para la página Compra-Finalizada)
+      sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+
+      // 8. Guardar en localStorage (historial de órdenes)
+      const orderHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+      orderHistory.unshift({
+        ...checkoutData,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Mantener solo las últimas 20 órdenes
+      if (orderHistory.length > 20) {
+        orderHistory.pop();
+      }
+      localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+
+      // 9. Limpiar el carrito después de la compra exitosa
+      clearCart();
+      localStorage.removeItem('cartItems');
+
+      // 10. Simular procesamiento de pago y redirigir
+      setTimeout(() => {
+        setIsProcessing(false);
+        navigate('/compra-finalizada');
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error procesando la compra:', error);
+      setError(error.message || 'Ocurrió un error al procesar la compra. Por favor intenta nuevamente.');
+      setIsProcessing(false);
+    }
+  };
+
+  if (!cartItems || cartItems.length === 0) {
+    return (
+      <div className="checkout-container" style={{ textAlign: 'center', padding: '100px 20px' }}>
+        <h2>🛒 Tu carrito está vacío</h2>
+        <p>Redirigiendo a la tienda...</p>
+      </div>
+    );
   }
 
   return (
@@ -93,6 +183,20 @@ export default function Checkout() {
 
       {/* Contenedor Principal */}
       <div className="checkout-container">
+        {/* Mostrar error si existe */}
+        {error && (
+          <div style={{
+            backgroundColor: '#ff4444',
+            color: 'white',
+            padding: '1rem',
+            borderRadius: '8px',
+            marginBottom: '1rem',
+            textAlign: 'center'
+          }}>
+            ⚠️ {error}
+          </div>
+        )}
+
         <div className="checkout-grid">
           {/* Formulario */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -110,6 +214,7 @@ export default function Checkout() {
                   value={formData.email}
                   onChange={handleInputChange}
                   className="checkout-input"
+                  required
                 />
               </div>
             </div>
@@ -120,11 +225,43 @@ export default function Checkout() {
                 📍 Dirección de Envío
               </h2>
               <div className="checkout-form-group">
-                <input type="text" name="fullName" placeholder="Nombre completo" value={formData.fullName} onChange={handleInputChange} className="checkout-input" />
-                <input type="text" name="address" placeholder="Dirección" value={formData.address} onChange={handleInputChange} className="checkout-input" />
+                <input 
+                  type="text" 
+                  name="fullName" 
+                  placeholder="Nombre completo" 
+                  value={formData.fullName} 
+                  onChange={handleInputChange} 
+                  className="checkout-input"
+                  required
+                />
+                <input 
+                  type="text" 
+                  name="address" 
+                  placeholder="Dirección" 
+                  value={formData.address} 
+                  onChange={handleInputChange} 
+                  className="checkout-input"
+                  required
+                />
                 <div className="checkout-form-row">
-                  <input type="text" name="city" placeholder="Ciudad" value={formData.city} onChange={handleInputChange} className="checkout-input" />
-                  <input type="text" name="zipCode" placeholder="Código Postal" value={formData.zipCode} onChange={handleInputChange} className="checkout-input" />
+                  <input 
+                    type="text" 
+                    name="city" 
+                    placeholder="Ciudad" 
+                    value={formData.city} 
+                    onChange={handleInputChange} 
+                    className="checkout-input"
+                    required
+                  />
+                  <input 
+                    type="text" 
+                    name="zipCode" 
+                    placeholder="Código Postal" 
+                    value={formData.zipCode} 
+                    onChange={handleInputChange} 
+                    className="checkout-input"
+                    required
+                  />
                 </div>
               </div>
             </div>
@@ -136,11 +273,46 @@ export default function Checkout() {
                 Información de Pago
               </h2>
               <form onSubmit={handleSubmit} className="checkout-form-group">
-                <input type="text" name="cardNumber" placeholder="Número de tarjeta" value={formData.cardNumber} onChange={handleInputChange} maxLength="19" className="checkout-input" />
-                <input type="text" name="cardName" placeholder="Nombre en la tarjeta" value={formData.cardName} onChange={handleInputChange} className="checkout-input" />
+                <input 
+                  type="text" 
+                  name="cardNumber" 
+                  placeholder="Número de tarjeta" 
+                  value={formData.cardNumber} 
+                  onChange={handleInputChange} 
+                  maxLength="19" 
+                  className="checkout-input"
+                  required
+                />
+                <input 
+                  type="text" 
+                  name="cardName" 
+                  placeholder="Nombre en la tarjeta" 
+                  value={formData.cardName} 
+                  onChange={handleInputChange} 
+                  className="checkout-input"
+                  required
+                />
                 <div className="checkout-form-row">
-                  <input type="text" name="expiry" placeholder="MM/AA" value={formData.expiry} onChange={handleInputChange} maxLength="5" className="checkout-input" />
-                  <input type="text" name="cvv" placeholder="CVV" value={formData.cvv} onChange={handleInputChange} maxLength="4" className="checkout-input" />
+                  <input 
+                    type="text" 
+                    name="expiry" 
+                    placeholder="MM/AA" 
+                    value={formData.expiry} 
+                    onChange={handleInputChange} 
+                    maxLength="5" 
+                    className="checkout-input"
+                    required
+                  />
+                  <input 
+                    type="text" 
+                    name="cvv" 
+                    placeholder="CVV" 
+                    value={formData.cvv} 
+                    onChange={handleInputChange} 
+                    maxLength="4" 
+                    className="checkout-input"
+                    required
+                  />
                 </div>
 
                 <button
@@ -170,30 +342,62 @@ export default function Checkout() {
               </h2>
 
               <div className="checkout-items-container">
-                {cartItems.map(item => (
-                  <div key={item.id} className="checkout-item">
-                    <div className="checkout-item-image">{item.image}</div>
-                    <div className="checkout-item-details">
-                      <h3 className="checkout-item-name">{item.name}</h3>
-                      <p className="checkout-item-price">S/ {item.price.toFixed(2)}</p>
-                      <div className="checkout-quantity-controls">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="checkout-qty-btn">−</button>
-                        <span className="checkout-quantity">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="checkout-qty-btn">+</button>
-                        <button onClick={() => removeItem(item.id)} className="checkout-remove-btn">
-                          <Trash2 size={16} />
-                        </button>
+                {cartItems && cartItems.length > 0 ? (
+                  cartItems.map(item => (
+                    <div key={item.id} className="checkout-item">
+                      <div className="checkout-item-image">{item.image}</div>
+                      <div className="checkout-item-details">
+                        <h3 className="checkout-item-name">{item.name}</h3>
+                        <p className="checkout-item-price">S/ {parseFloat(item.price).toFixed(2)}</p>
+                        <div className="checkout-quantity-controls">
+                          <button 
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)} 
+                            className="checkout-qty-btn"
+                            disabled={isProcessing}
+                          >
+                            −
+                          </button>
+                          <span className="checkout-quantity">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)} 
+                            className="checkout-qty-btn"
+                            disabled={isProcessing}
+                          >
+                            +
+                          </button>
+                          <button 
+                            onClick={() => removeItem(item.id)} 
+                            className="checkout-remove-btn"
+                            disabled={isProcessing}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p style={{ textAlign: 'center', color: '#fff' }}>No hay productos en el carrito</p>
+                )}
               </div>
 
               <div className="checkout-summary-details">
-                <div className="checkout-summary-row"><span>Subtotal</span><span>S/ {subtotal.toFixed(2)}</span></div>
-                <div className="checkout-summary-row"><span>IGV (18%)</span><span>S/ {tax.toFixed(2)}</span></div>
-                <div className="checkout-summary-row"><span>Envío</span><span>{shipping === 0 ? '🎉 GRATIS' : `S/ ${shipping.toFixed(2)}`}</span></div>
-                <div className="checkout-total-row"><span>TOTAL</span><span>S/ {total.toFixed(2)}</span></div>
+                <div className="checkout-summary-row">
+                  <span>Subtotal</span>
+                  <span>S/ {subtotal.toFixed(2)}</span>
+                </div>
+                <div className="checkout-summary-row">
+                  <span>IGV (18%)</span>
+                  <span>S/ {tax.toFixed(2)}</span>
+                </div>
+                <div className="checkout-summary-row">
+                  <span>Envío</span>
+                  <span>{shipping === 0 ? '🎉 GRATIS' : `S/ ${shipping.toFixed(2)}`}</span>
+                </div>
+                <div className="checkout-total-row">
+                  <span>TOTAL</span>
+                  <span>S/ {total.toFixed(2)}</span>
+                </div>
               </div>
 
               {shipping > 0 && (
@@ -206,5 +410,5 @@ export default function Checkout() {
         </div>
       </div>
     </>
-  )
+  );
 }

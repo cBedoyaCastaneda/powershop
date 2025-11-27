@@ -1,14 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'src/pages/css/Cart.css';
 
 function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
   const navigate = useNavigate();
 
+  // Guardar carrito en localStorage cada vez que cambie
+  useEffect(() => {
+    if (cartItems && cartItems.length > 0) {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } else {
+      localStorage.removeItem('cartItems');
+    }
+  }, [cartItems]);
+
   if (!isOpen) return null;
 
+  const calculateSubtotal = () => {
+    return cartItems.reduce((total, item) => {
+      const price = parseFloat(item.price) || 0;
+      return total + (price * item.quantity);
+    }, 0);
+  };
+
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const subtotal = calculateSubtotal();
+    // Aquí puedes agregar impuestos o descuentos si es necesario
+    return subtotal;
   };
 
   const handleOverlayClick = (e) => {
@@ -18,8 +36,48 @@ function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
   };
 
   const handleCheckout = () => {
+    // Preparar datos para el checkout
+    const checkoutData = {
+      items: cartItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+        category: item.category
+      })),
+      subtotal: calculateSubtotal(),
+      shipping: 0, // Envío gratis
+      total: calculateTotal(),
+      timestamp: new Date().toISOString(),
+      itemCount: cartItems.reduce((total, item) => total + item.quantity, 0)
+    };
+
+    // Guardar datos del checkout en localStorage
+    localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+
+    // También guardar en el historial (útil para ver pedidos anteriores)
+    const orderHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+    const orderNumber = `ORD-${Date.now()}`;
+    
+    const orderRecord = {
+      orderNumber,
+      ...checkoutData,
+      status: 'pending' // pending, processing, completed, cancelled
+    };
+
+    // Agregar al historial (mantener últimas 10 órdenes)
+    orderHistory.unshift(orderRecord);
+    if (orderHistory.length > 10) {
+      orderHistory.pop();
+    }
+    localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+
+    console.log('Datos guardados para checkout:', checkoutData);
+    console.log('Número de orden:', orderNumber);
+
     onClose(); // Cierra el modal del carrito
-    navigate('/checkout'); // ✅ Con minúscula
+    navigate('/checkout'); // Navega al checkout
   };
 
   return (
@@ -45,7 +103,7 @@ function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
                     <div className="item-image">{item.image}</div>
                     <div className="item-details">
                       <h4>{item.name}</h4>
-                      <p className="item-price">${item.price}</p>
+                      <p className="item-price">${parseFloat(item.price).toFixed(2)}</p>
                     </div>
                     <div className="item-actions">
                       <div className="quantity-controls">
@@ -78,7 +136,7 @@ function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
               <div className="cart-summary">
                 <div className="summary-row">
                   <span>Subtotal:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>${calculateSubtotal().toFixed(2)}</span>
                 </div>
                 <div className="summary-row">
                   <span>Envío:</span>
