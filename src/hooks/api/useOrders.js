@@ -27,7 +27,7 @@ export function useOrders() {
 
   
   async function CreateOrder(payload) {
-    const orderResponse = await fetch('http://localhost:3000/api/ordenes', {
+    const orderResponse = await fetch('http://localhost:3000/ordenes', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
