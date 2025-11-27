@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './profile.css'
+
 function Profile() {
   const [usuario, setUsuario] = useState(null);
   const navigate = useNavigate();
@@ -46,6 +47,14 @@ function Profile() {
           }}
         >
           Cerrar sesión
+        </button>
+        <button
+          className="logout-btn volver"
+          onClick={() => {
+            navigate("/home");
+          }}
+        >
+          Volver
         </button>
       </div>
     </div>

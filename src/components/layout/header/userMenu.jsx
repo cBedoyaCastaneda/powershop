@@ -46,7 +46,7 @@ function UserMenu() {
         <div className="user-menu-panel">
           <ul className="user-menu-list">
             <li>
-              <Link to="/">Perfil</Link>
+              <Link to="/profile">Perfil</Link>
             </li>
             <li>
               <Link to="/">Ver Compras</Link>

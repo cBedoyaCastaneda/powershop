@@ -32,7 +32,6 @@ const router = createBrowserRouter([
       { path: "", element: <Home /> },
       { path: "home", element: <Home /> },
       { path: "login", element:<Login />},
-      { path: "profile", element:<Profile />},
       { path: "registro", element:<Registro />},
       { path: "recuperar-contraseña", element:<RecuperarContraseña />},
       { path: "product/:id", element:<ProductDetail />},
@@ -47,6 +46,7 @@ const router = createBrowserRouter([
       </AuthGuard>
     ),
     children: [
+      { path: "profile", element:<Profile />},
       { path: "checkout", element:<Checkout />},
       { path: "compra-finalizada", element:<OrderSuccess />},
     ]

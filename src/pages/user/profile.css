@@ -61,7 +61,7 @@
 /* ====== BOTÓN DE LOGOUT ====== */
 .logout-btn {
   margin-top: 20px;
-  width: 100%;
+  width: 80%;
   padding: 12px;
   background: #ff006e;
   border: none;
@@ -78,6 +78,14 @@
   background: #ff2faf;
   box-shadow: 0 0 15px rgba(255, 0, 180, 0.8);
   transform: scale(1.03);
+}
+
+.volver {
+  background: #0066ff;
+}
+
+.volver:hover {
+  background: #2378f7;
 }
 
 /* ====== ANIMACIONES ====== */
