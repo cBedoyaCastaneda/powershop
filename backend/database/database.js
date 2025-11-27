@@ -12,9 +12,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
             require: true,
             rejectUnauthorized: false
         }
-    },
-    define:{
-        freezeTableName: true
     }
 })
 
