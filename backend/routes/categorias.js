@@ -1,70 +1,19 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { Categoria, Producto } = require("./../models");
-
-/**
- * Route: POST /
- * Crea una nueva categoría.
- * Requiere: { nombre, descripcion } en el cuerpo de la solicitud.
- */
-router.post('/', async (req, res) => {
-  try {
-    const { nombre, descripcion } = req.body;
-
-    // Validación básica
-    if (!nombre) {
-      return res.status(400).json({ error: 'El campo "nombre" es obligatorio para crear una categoría.' });
-    }
-
-    // Creación de la nueva categoría
-    const nuevaCategoria = await Categoria.create({
-      nombre,
-      descripcion: descripcion || 'Sin descripción',
-    });
-
-    // Respuesta exitosa
-    res.status(201).json({ 
-      message: 'Categoría creada exitosamente', 
-      categoria: nuevaCategoria 
-    });
-
-  } catch (error) {
-    // Manejo de errores de base de datos (ej. nombre duplicado)
-    if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(409).json({ error: `La categoría con nombre "${req.body.nombre}" ya existe.` });
-    }
-    console.error('Error creando categoría:', error);
-    res.status(500).json({ 
-      error: 'Error interno del servidor al crear la categoría.',
-      details: error.message 
-    });
-  }
-});
+const { Categoria, Producto } = require("../models");
 
 /**
  * Route: GET /
- * Obtiene todas las categorías. Incluye la cuenta de productos asociados.
+ * Obtiene todas las categorías
  */
 router.get('/', async (req, res) => {
   try {
-    const categorias = await Categoria.findAll({
-      // Se pueden incluir los productos asociados usando Eager Loading
-      include: [{
-        model: Producto,
-        as: 'productos',
-        attributes: ['id', 'nombre', 'precio'], // Seleccionamos solo campos relevantes
-        required: false // LEFT JOIN: incluye categorías incluso si no tienen productos
-      }],
-      attributes: { exclude: ['createdAt', 'updatedAt'] },
-      order: [['nombre', 'ASC']]
-    });
-
+    const categorias = await Categoria.findAll();
     res.status(200).json(categorias);
-
   } catch (error) {
-    console.error('Error al obtener todas las categorías:', error);
+    console.error('Error al obtener categorías:', error);
     res.status(500).json({ 
-      error: 'Error interno del servidor al buscar categorías.',
+      error: 'Error al obtener categorías',
       details: error.message 
     });
   }
@@ -72,31 +21,92 @@ router.get('/', async (req, res) => {
 
 /**
  * Route: GET /:id
- * Obtiene una categoría individual por ID.
+ * Obtiene una categoría específica por ID con sus productos
  */
 router.get('/:id', async (req, res) => {
-  const categoryId = req.params.id;
-
   try {
-    const categoria = await Categoria.findByPk(categoryId, {
+    const { id } = req.params;
+    
+    const categoria = await Categoria.findByPk(id, {
       include: [{
         model: Producto,
-        as: 'productos',
-        attributes: ['id', 'nombre', 'precio'] 
-      }],
-      attributes: { exclude: ['createdAt', 'updatedAt'] }
+        attributes: ['id', 'nombre', 'precio', 'imagen', 'destacado']
+      }]
     });
 
     if (!categoria) {
-      return res.status(404).json({ error: `Categoría con ID ${categoryId} no encontrada.` });
+      return res.status(404).json({ error: `Categoría con ID ${id} no encontrada` });
     }
 
     res.status(200).json(categoria);
-
   } catch (error) {
-    console.error('Error al obtener categoría por ID:', error);
+    console.error('Error al obtener categoría:', error);
     res.status(500).json({ 
-      error: 'Error interno del servidor al buscar categoría.',
+      error: 'Error al obtener categoría',
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * Route: POST /
+ * Crea una nueva categoría
+ * Requiere: { nombre, descripcion }
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { nombre, descripcion } = req.body;
+
+    if (!nombre) {
+      return res.status(400).json({ error: 'El nombre es requerido' });
+    }
+
+    const nuevaCategoria = await Categoria.create({
+      nombre,
+      descripcion: descripcion || null
+    });
+
+    res.status(201).json({ 
+      message: 'Categoría creada exitosamente', 
+      categoria: nuevaCategoria
+    });
+  } catch (error) {
+    console.error('Error al crear categoría:', error);
+    res.status(500).json({ 
+      error: 'Error al crear categoría',
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * Route: PUT /:id
+ * Actualiza una categoría existente
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, descripcion } = req.body;
+
+    const categoria = await Categoria.findByPk(id);
+
+    if (!categoria) {
+      return res.status(404).json({ error: `Categoría con ID ${id} no encontrada` });
+    }
+
+    await categoria.update({
+      nombre: nombre || categoria.nombre,
+      descripcion: descripcion !== undefined ? descripcion : categoria.descripcion
+    });
+
+    res.status(200).json({ 
+      message: 'Categoría actualizada exitosamente', 
+      categoria
+    });
+  } catch (error) {
+    console.error('Error al actualizar categoría:', error);
+    res.status(500).json({ 
+      error: 'Error al actualizar categoría',
       details: error.message 
     });
   }
@@ -104,38 +114,38 @@ router.get('/:id', async (req, res) => {
 
 /**
  * Route: DELETE /:id
- * Elimina una categoría por ID.
- * NOTA: Sequelize maneja por defecto la eliminación en cascada si se configuró en la migración.
- * Si hay productos asociados, la eliminación podría fallar dependiendo de las restricciones FK de la DB.
+ * Elimina una categoría por ID
  */
 router.delete('/:id', async (req, res) => {
-  const categoryId = req.params.id;
-
   try {
-    const categoria = await Categoria.findByPk(categoryId);
+    const { id } = req.params;
+
+    const categoria = await Categoria.findByPk(id);
+
     if (!categoria) {
-      return res.status(404).json({ error: `Categoría con ID ${categoryId} no encontrada.` });
+      return res.status(404).json({ error: `Categoría con ID ${id} no encontrada` });
     }
 
-    // Se realiza la eliminación
-    const deleteCount = await Categoria.destroy({
-      where: { id: categoryId }
-    });
-
-    if (deleteCount === 0) {
-      return res.status(404).json({ error: `Categoría con ID ${categoryId} no encontrada.` });
+    // Verificar si hay productos asociados
+    const productosAsociados = await Producto.count({ where: { categoriaId: id } });
+    
+    if (productosAsociados > 0) {
+      return res.status(400).json({ 
+        error: 'No se puede eliminar la categoría porque tiene productos asociados',
+        productosCount: productosAsociados
+      });
     }
 
-    // Respuesta exitosa (200 OK)
+    await categoria.destroy();
+
     res.status(200).json({ 
-      message: `Categoría con ID ${categoryId} eliminada exitosamente.`,
-      deletedCategory: categoria.nombre
+      message: 'Categoría eliminada exitosamente',
+      id: parseInt(id)
     });
-
   } catch (error) {
-    console.error('Error eliminando categoría:', error);
+    console.error('Error al eliminar categoría:', error);
     res.status(500).json({ 
-      error: 'Error interno del servidor al eliminar la categoría. Revise si hay productos asociados.',
+      error: 'Error al eliminar categoría',
       details: error.message 
     });
   }

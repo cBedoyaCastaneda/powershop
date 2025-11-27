@@ -1,72 +1,26 @@
 const express = require("express");
 const router = express.Router();
-const { Producto, Categoria } = require("./../models");
-/**
- * Route: POST /
- * Creates a new product.
- * Requires: { nombre, descripcion, precio, categoriaId, destacado } in the request body.
- */
-router.post('/', async (req, res) => {
-  try {
-    const { nombre, descripcion, precio, categoriaId, destacado } = req.body;
-
-    // Basic input validation
-    if (!nombre || !precio || !categoriaId || !destacado) {
-      return res.status(400).json({ error: 'Missing required fields: nombre, precio, and categoriaId.' });
-    }
-
-    // Check if category exists
-    const categoria = await Categoria.findByPk(categoriaId);
-    if (!categoria) {
-      return res.status(404).json({ error: `Category with ID ${categoriaId} not found.` });
-    }
-
-    // Create the new product
-    const nuevoProducto = await Producto.create({
-      nombre,
-      descripcion: descripcion || 'No description provided',
-      precio: parseFloat(precio),
-      categoriaId,
-      destacado
-    });
-
-    // Success response
-    res.status(201).json({ 
-      message: 'Product created successfully', 
-      producto: nuevoProducto 
-    });
-
-  } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ 
-      error: 'Internal server error while creating product.',
-      details: error.message 
-    });
-  }
-});
+const { Producto, Categoria } = require("../models");
 
 /**
  * Route: GET /
- * Retrieves all products. Includes their category (eager loading).
+ * Obtiene todos los productos con su categoría asociada
  */
 router.get('/', async (req, res) => {
   try {
     const productos = await Producto.findAll({
-      // Include the associated Category data
       include: [{
         model: Categoria,
-        as: 'categoria',
-        attributes: ['id', 'nombre'] // Select only relevant category fields
-      }],
-      attributes: { exclude: ['createdAt', 'updatedAt'] }
+        attributes: ['id', 'nombre', 'descripcion']
+      }]
     });
 
     res.status(200).json(productos);
 
   } catch (error) {
-    console.error('Error retrieving all products:', error);
+    console.error('Error al obtener productos:', error);
     res.status(500).json({ 
-      error: 'Internal server error while fetching products.',
+      error: 'Error al obtener productos',
       details: error.message 
     });
   }
@@ -74,32 +28,144 @@ router.get('/', async (req, res) => {
 
 /**
  * Route: GET /:id
- * Retrieves a single product by ID.
+ * Obtiene un producto específico por ID con su categoría
  */
 router.get('/:id', async (req, res) => {
-  const productId = req.params.id;
-
   try {
-    const producto = await Producto.findByPk(productId, {
-      // Include the associated Category data
+    const { id } = req.params;
+    
+    const producto = await Producto.findByPk(id, {
       include: [{
         model: Categoria,
-        as: 'categoria',
-        attributes: ['id', 'nombre', 'descripcion'] 
-      }],
-      attributes: { exclude: ['createdAt', 'updatedAt'] }
+        attributes: ['id', 'nombre', 'descripcion']
+      }]
     });
 
     if (!producto) {
-      return res.status(404).json({ error: `Product with ID ${productId} not found.` });
+      return res.status(404).json({ error: `Producto con ID ${id} no encontrado` });
     }
 
     res.status(200).json(producto);
 
   } catch (error) {
-    console.error('Error retrieving product by ID:', error);
+    console.error('Error al obtener producto:', error);
     res.status(500).json({ 
-      error: 'Internal server error while fetching product.',
+      error: 'Error al obtener producto',
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * Route: POST /
+ * Crea un nuevo producto
+ * Requiere: { nombre, descripcion, precio, stock, imagen, categoriaId, destacado }
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { nombre, descripcion, precio, stock, imagen, categoriaId, destacado } = req.body;
+
+    // Validación de campos requeridos
+    if (!nombre || !precio || !categoriaId) {
+      return res.status(400).json({ 
+        error: 'Campos requeridos: nombre, precio y categoriaId' 
+      });
+    }
+
+    // Verificar que la categoría existe
+    const categoria = await Categoria.findByPk(categoriaId);
+    if (!categoria) {
+      return res.status(404).json({ 
+        error: `Categoría con ID ${categoriaId} no encontrada` 
+      });
+    }
+
+    // Crear el producto
+    const nuevoProducto = await Producto.create({
+      nombre,
+      descripcion: descripcion || null,
+      precio: parseFloat(precio),
+      stock: stock || 0,
+      imagen: imagen || null,
+      categoriaId,
+      destacado: destacado || false
+    });
+
+    // Obtener el producto con su categoría
+    const productoCompleto = await Producto.findByPk(nuevoProducto.id, {
+      include: [{
+        model: Categoria,
+        attributes: ['id', 'nombre']
+      }]
+    });
+
+    res.status(201).json({ 
+      message: 'Producto creado exitosamente', 
+      producto: productoCompleto
+    });
+
+  } catch (error) {
+    console.error('Error al crear producto:', error);
+    res.status(500).json({ 
+      error: 'Error al crear producto',
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * Route: PUT /:id
+ * Actualiza un producto existente
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, descripcion, precio, stock, imagen, categoriaId, destacado } = req.body;
+
+    const producto = await Producto.findByPk(id);
+
+    if (!producto) {
+      return res.status(404).json({ error: `Producto con ID ${id} no encontrado` });
+    }
+
+    // Si se cambia la categoría, verificar que existe
+    if (categoriaId && categoriaId !== producto.categoriaId) {
+      const categoria = await Categoria.findByPk(categoriaId);
+      if (!categoria) {
+        return res.status(404).json({ 
+          error: `Categoría con ID ${categoriaId} no encontrada` 
+        });
+      }
+    }
+
+    // Actualizar el producto
+    await producto.update({
+      nombre: nombre || producto.nombre,
+      descripcion: descripcion !== undefined ? descripcion : producto.descripcion,
+      precio: precio !== undefined ? parseFloat(precio) : producto.precio,
+      stock: stock !== undefined ? stock : producto.stock,
+      imagen: imagen !== undefined ? imagen : producto.imagen,
+      categoriaId: categoriaId || producto.categoriaId,
+      destacado: destacado !== undefined ? destacado : producto.destacado
+    });
+
+    // Obtener el producto actualizado con su categoría
+    const productoActualizado = await Producto.findByPk(id, {
+      include: [{
+        model: Categoria,
+        attributes: ['id', 'nombre']
+      }]
+    });
+
+    res.status(200).json({ 
+      message: 'Producto actualizado exitosamente', 
+      producto: productoActualizado
+    });
+
+  } catch (error) {
+    console.error('Error al actualizar producto:', error);
+    res.status(500).json({ 
+      error: 'Error al actualizar producto',
       details: error.message 
     });
   }
@@ -107,32 +173,32 @@ router.get('/:id', async (req, res) => {
 
 /**
  * Route: DELETE /:id
- * Deletes a product by ID.
+ * Elimina un producto por ID
  */
 router.delete('/:id', async (req, res) => {
-  const productId = req.params.id;
-
   try {
-    // Find the product to ensure it exists before attempting delete
-    const producto = await Producto.findByPk(productId);
+    const { id } = req.params;
+
+    const producto = await Producto.findByPk(id);
+
     if (!producto) {
-      return res.status(404).json({ error: `Product with ID ${productId} not found.` });
+      return res.status(404).json({ error: `Producto con ID ${id} no encontrado` });
     }
 
-    // Perform the deletion
     await producto.destroy();
 
-    // Success response (200 OK or 204 No Content are common for successful deletion)
     res.status(200).json({ 
-      message: `Product with ID ${productId} deleted successfully.`,
-      deletedProduct: producto
+      message: 'Producto eliminado exitosamente',
+      id: parseInt(id)
     });
 
   } catch (error) {
-    console.error('Error deleting product:', error);
+    console.error('Error al eliminar producto:', error);
     res.status(500).json({ 
-      error: 'Internal server error while deleting product.',
+      error: 'Error al eliminar producto',
       details: error.message 
     });
   }
 });
+
+module.exports = router;

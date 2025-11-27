@@ -10,13 +10,13 @@ app.use(express.json());
 // Importar rutas modulares
 const categoriasRouters = require("./routes/categorias.js");
 const ordenesRouters = require("./routes/ordenes.js");
-// const productosRouters = require("./routes/productos.js");
+const productosRouters = require("./routes/productos.js");
 const usuariosRoutes = require("./routes/usuarios.js");
 
 // Usar las rutas
 app.use("/categorias", categoriasRouters);
 app.use("/ordenes", ordenesRouters);
-// app.use("/productos", productosRouters);
+app.use("/products", productosRouters);
 app.use("/users", usuariosRoutes);
 
 // INICIO 
