@@ -1,4 +1,4 @@
-name: Build and deploy React Vite app to Azure Web App
+name: Deploy Express backend to Azure Web App
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy-backend:
     runs-on: windows-latest
     permissions:
       id-token: write
@@ -21,25 +21,14 @@ jobs:
         with:
           node-version: '22.x'
 
-      # Instalar dependencias y construir app
-      - name: Install Frontend dependencies and build
-        run: |
-          npm ci
-          npm run build
-
-      # Copiar build al backend
-      - name: Copy frontend build to backend
-        run: |
-          xcopy /E /I /Y dist backend\dist
-    
       # Instalar dependencias del backend
       - name: Install backend dependencies
         run: |
           cd backend
           npm ci
 
-      # Listar archivos (opcional, para debugging)
-      - name: List files after build
+      # Listar archivos del backend (opcional)
+      - name: List backend files
         run: dir /s
         shell: cmd
 
@@ -47,14 +36,14 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_019D2B324EF046C491DD03CE18314B00 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_46F3BFFB64C243F7B881FBF167C4EF7D }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0ECE84854D2849099767D764A17F7F99 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BACKEND }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BACKEND }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BACKEND }}
 
       # Deploy a Azure Web App
-      - name: Deploy to Azure Web App
+      - name: Deploy backend
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'proyecto-negocio-de-superpoderes'
+          app-name: 'nombre-backend-app'
           slot-name: 'Production'
-          package: ./backend   # apunta directamente a la carpeta de build
+          package: ./backend   # Apunta directamente al backend
