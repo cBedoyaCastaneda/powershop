@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { usePagination } from "../../hooks/usePagination";
+import { usePagination } from "@hooks/usePagination";
+import useUsers from "@hooks/api/useUsers"
 
 export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,7 @@ export default function AdminUsers() {
   );
   
   const { data, page, pages, setPage, total } = usePagination(filteredUsers, 10);
+  const { GetUsers, CreateUser, DeleteUser } = useUsers()
   
   useEffect(() => {
     fetchUsers();
@@ -29,8 +31,7 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3000/users");
-      const data = await response.json();
+      const data = await GetUsers()
       setUsers(data);
     } catch (error) {
       console.error("Error al cargar usuarios:", error);
@@ -53,10 +54,7 @@ export default function AdminUsers() {
     if (!window.confirm("¿Estás seguro de eliminar este usuario?")) return;
     
     try {
-      const response = await fetch(`http://localhost:3000/users/${id}`, {
-        method: "DELETE"
-      });
-      
+      const response = await DeleteUser(id)
       if (response.ok) {
         alert("Usuario eliminado correctamente");
         fetchUsers();
@@ -78,14 +76,7 @@ export default function AdminUsers() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(formData)
-      });
-
+      const response = await CreateUser(JSON.stringify(formData))
       if (response.ok) {
         alert("Usuario creado correctamente");
         setShowCreateModal(false);

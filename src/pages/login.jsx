@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
+import useUsers from "@hooks/api/useUsers"
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { LoginUser } = useUsers()
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -17,24 +19,12 @@ export default function Login() {
 
     try {
       // Usar el endpoint de login que valida con bcrypt
-      const response = await fetch('http://localhost:3000/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password: password
-        })
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Error al iniciar sesión');
-      }
-
-      const usuario = await response.json();
-
+      const payload = JSON.stringify({
+        email: email.trim(),
+        password: password
+      })
+      
+      const usuario = await LoginUser(payload)
 
       // Guardar usuario en localStorage
       localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
