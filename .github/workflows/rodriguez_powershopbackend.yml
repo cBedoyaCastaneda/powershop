@@ -59,4 +59,5 @@ jobs:
         with:
           app-name: 'powershopbackend'
           slot-name: 'Production'
-          package: .
+          package: ./backend
+
