@@ -16,6 +16,7 @@ import Checkout from "@pages/checkout";
 import RecuperarContraseña from "@pages/forgotPassword";
 import Home from "@pages/home";
 import Login from "@pages/login";
+import Profile from "../pages/user/profile";
 import NotFound from "@pages/notFound";
 import Unauthorized from "@pages/unauthorized";
 import OrderSuccess from "@pages/orderSuccess";
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
       { path: "", element: <Home /> },
       { path: "home", element: <Home /> },
       { path: "login", element:<Login />},
+      { path: "profile", element:<Profile />},
       { path: "registro", element:<Registro />},
       { path: "recuperar-contraseña", element:<RecuperarContraseña />},
       { path: "product/:id", element:<ProductDetail />},
