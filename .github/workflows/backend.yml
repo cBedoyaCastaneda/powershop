@@ -37,57 +37,9 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-          name: Deploy Express backend to Azure Web App
-
-on:
-  push:
-    branches:
-      - backend
-  workflow_dispatch:
-
-jobs:
-  deploy-backend:
-    runs-on: windows-latest
-    permissions:
-      contents: read
-    steps:
-      # Clonar el repositorio
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Configurar Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.x'
-
-      # Instalar dependencias del backend
-      - name: Install backend dependencies
-        run: |
-          cd backend
-          npm ci
-
-      # Listar archivos del backend (opcional)
-      - name: List backend files
-        run: dir /s
-        shell: cmd
-
-      # Login a Azure usando client-secret
-      - name: Azure login
-        uses: azure/login@v2
-        with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_262D49CE86644C4BA057F28F66DFBC65 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_20EB930BE7014E06A6AF5EF87CBA595E }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4F0028C39E684FA793AF65345998E65C }}
-
-      # Deploy a Azure Web App
-      - name: Deploy backend
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'proyecto-negocio-de-superpoderes'
-          slot-name: 'Production'
-          package: ./backend   # apunta al backend
-
 
       # Deploy a Azure Web App
       - name: Deploy backend
