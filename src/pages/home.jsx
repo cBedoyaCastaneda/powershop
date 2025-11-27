@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import CartDrawer from "../components/cart/cartDrawer/cartDrawer.jsx";
-import UserMenu from '../components/user/userMenuHome.jsx';
-import { useCart } from '../hooks/useCart.js';
-import ProductGrid from '../components/products/productGrid.jsx';
+import { useCart } from '@hooks/useCart.js';
+import CartDrawer from "@components/cart/cartDrawer/cartDrawer.jsx";
+import UserMenu from '@components/layout/header/header.jsx';
+import ProductGrid from '@components/products/productGrid.jsx';
+import PageHeader from '../components/layout/header/header';
 
 function Home() {
     // Estado del carrito
@@ -145,33 +146,7 @@ function Home() {
     return (
         <div className="app">
             {/* Header */}
-            <header className="header">
-                <div className="header-container">
-                    <div className="logo">
-                        <span className="logo-icon">🛒</span>
-                        <h1>Powershop</h1>
-                    </div>
-
-                    <div className="search-bar">
-                        <input
-                            type="text"
-                            placeholder="Buscar productos..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <button className="search-btn">🔍</button>
-                    </div>
-
-                    <nav className="nav">
-                        <a href="#" className="nav-link">Inicio</a>
-                        <a href="#ofertas" className="nav-link">Ofertas</a>
-                        <UserMenu/>
-                        <button className="cart-btn" onClick={() => setIsCartOpen(true)}>
-                            🛒 <span className="cart-badge">{getTotalItems()}</span>
-                        </button>
-                    </nav>
-                </div>
-            </header>
+            <PageHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsCartOpen={setIsCartOpen} getTotalItems={getTotalItems} />
 
             {/* Hero Section */}
             <section className="hero">
