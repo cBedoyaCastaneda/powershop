@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 function AuthGuard({ children }) {
   const {GetUserLogged} = useLocalStorage()
   const logged = GetUserLogged()
-  if (!logged || logged.tipo !== "administrador") return <Navigate to="/login" replace />;
+  if (!logged || !logged.esAdmin) return <Navigate to="/login" replace />;
   return children;
 }
 export default AuthGuard

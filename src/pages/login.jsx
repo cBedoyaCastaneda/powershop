@@ -39,9 +39,11 @@ export default function Login() {
       localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
       
       // Redirigir según el tipo de usuario
-      if (usuario.tipo === "administrador" || usuario.role === "admin") {
+      if (usuario.esAdmin) {
+        console.log("login:es admin")
         navigate('/admin');
       } else {
+        console.log("login:NO es admin")
         navigate('/home');
       }
 

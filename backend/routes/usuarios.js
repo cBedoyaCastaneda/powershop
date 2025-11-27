@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
 // Agregar un nuevo usuario con encriptación de contraseña
 router.post("/", async (req, res) => {
   try {
-    const { nombre, apellido, email, password, tipo } = req.body;
+    const { nombre, apellido, usuario, email, password, direccion, esAdmin } = req.body;
 
     // Validar que los campos requeridos existan
     if (!email || !password) {
@@ -39,9 +39,11 @@ router.post("/", async (req, res) => {
     const nuevoUsuario = await Usuario.create({
       nombre: nombre || null,
       apellido: apellido || null,
-      email,
+      usuario: usuario || null,
+      email: email,
       password: hashedPassword,
-      tipo: tipo || 'usuario'
+      direccion: direccion || "Ca. Paraguay",
+      esAdmin: esAdmin || false
     });
 
     // Devolver usuario sin la contraseña

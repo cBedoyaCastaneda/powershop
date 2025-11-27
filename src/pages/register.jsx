@@ -80,9 +80,11 @@ export default function Registro() {
       const nuevoUsuario = {
         nombre: formData.nombre,
         apellido: formData.apellido,
+        //usuario
         email: formData.email,
         password: formData.password, // Se encriptará en el backend
-        tipo: 'usuario'
+        //direccion
+        esAdmin: false
       };
 
       const response = await fetch('http://localhost:3000/users', {
@@ -99,6 +101,7 @@ export default function Registro() {
 
       const data = await response.json();
       console.log('Usuario creado:', data);
+      localStorage.setItem('usuarioLogueado', JSON.stringify(nuevoUsuario));
 
       setSuccess('¡Registro exitoso! Redirigiendo al login...');
 
