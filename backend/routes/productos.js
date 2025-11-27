@@ -59,11 +59,11 @@ router.get('/:id', async (req, res) => {
 /**
  * Route: POST /
  * Crea un nuevo producto
- * Requiere: { nombre, descripcion, precio, stock, imagen, categoriaId, destacado }
+ * Requiere: { nombre, descripcion, precio, imagen, categoriaId, destacado }
  */
 router.post('/', async (req, res) => {
   try {
-    const { nombre, descripcion, precio, stock, imagen, categoriaId, destacado } = req.body;
+    const { nombre, descripcion, precio, imagen, categoriaId, destacado } = req.body;
 
     // Validación de campos requeridos
     if (!nombre || !precio || !categoriaId) {
@@ -85,7 +85,6 @@ router.post('/', async (req, res) => {
       nombre,
       descripcion: descripcion || null,
       precio: parseFloat(precio),
-      stock: stock || 0,
       imagen: imagen || null,
       categoriaId,
       destacado: destacado || false
@@ -120,7 +119,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, descripcion, precio, stock, imagen, categoriaId, destacado } = req.body;
+    const { nombre, descripcion, precio, imagen, categoriaId, destacado } = req.body;
 
     const producto = await Producto.findByPk(id);
 
@@ -143,7 +142,6 @@ router.put('/:id', async (req, res) => {
       nombre: nombre || producto.nombre,
       descripcion: descripcion !== undefined ? descripcion : producto.descripcion,
       precio: precio !== undefined ? parseFloat(precio) : producto.precio,
-      stock: stock !== undefined ? stock : producto.stock,
       imagen: imagen !== undefined ? imagen : producto.imagen,
       categoriaId: categoriaId || producto.categoriaId,
       destacado: destacado !== undefined ? destacado : producto.destacado

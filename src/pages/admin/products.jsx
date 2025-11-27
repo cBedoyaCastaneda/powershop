@@ -4,7 +4,6 @@ import { usePagination } from "../../hooks/usePagination";
 export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [q, setQ] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -15,11 +14,17 @@ export default function AdminProducts() {
     nombre: "",
     descripcion: "",
     precio: "",
-    stock: "",
     imagen: "",
     categoriaId: "",
     destacado: false
   });
+
+  // Categorías por defecto
+  const defaultCategories = [
+    { id: 1, nombre: "Electrónica" },
+    { id: 2, nombre: "Ropa" },
+    { id: 3, nombre: "Hogar" }
+  ];
 
   const filteredProducts = products.filter(p =>
     p.id.toString().includes(q.toLowerCase()) ||
@@ -31,7 +36,6 @@ export default function AdminProducts() {
 
   useEffect(() => {
     fetchProducts();
-    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -44,16 +48,6 @@ export default function AdminProducts() {
       console.error("Error al cargar productos:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/categorias");
-      const data = await response.json();
-      setCategories(data);
-    } catch (error) {
-      console.error("Error al cargar categorías:", error);
     }
   };
 
@@ -104,7 +98,6 @@ export default function AdminProducts() {
         body: JSON.stringify({
           ...formData,
           precio: parseFloat(formData.precio),
-          stock: parseInt(formData.stock) || 0,
           categoriaId: parseInt(formData.categoriaId)
         })
       });
@@ -116,7 +109,6 @@ export default function AdminProducts() {
           nombre: "",
           descripcion: "",
           precio: "",
-          stock: "",
           imagen: "",
           categoriaId: "",
           destacado: false
@@ -141,7 +133,7 @@ export default function AdminProducts() {
       for (const line of lines) {
         if (!line.trim()) continue;
 
-        const [nombre, descripcion, precio, stock, imagen, categoriaId, destacado] = line.split('|').map(s => s.trim());
+        const [nombre, descripcion, precio, imagen, categoriaId, destacado] = line.split('|').map(s => s.trim());
 
         if (!nombre || !precio || !categoriaId) {
           errors++;
@@ -158,7 +150,6 @@ export default function AdminProducts() {
               nombre,
               descripcion: descripcion || null,
               precio: parseFloat(precio),
-              stock: parseInt(stock) || 0,
               imagen: imagen || null,
               categoriaId: parseInt(categoriaId),
               destacado: destacado === 'true' || destacado === '1'
@@ -272,7 +263,6 @@ export default function AdminProducts() {
                 <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>Imagen</th>
                 <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>Nombre</th>
                 <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>Precio</th>
-                <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>Stock</th>
                 <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>Categoría</th>
                 <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>Destacado</th>
                 <th style={{ borderBottom: "1px solid #555", padding: "8px" }}>Acciones</th>
@@ -281,7 +271,7 @@ export default function AdminProducts() {
             <tbody>
               {data.length === 0 && (
                 <tr>
-                  <td colSpan={7} style={{ padding: "12px", textAlign: "center" }}>
+                  <td colSpan={6} style={{ padding: "12px", textAlign: "center" }}>
                     No hay productos
                   </td>
                 </tr>
@@ -300,10 +290,7 @@ export default function AdminProducts() {
                     {p.nombre}
                   </td>
                   <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
-                    ${p.precio?.toFixed(2)}
-                  </td>
-                  <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
-                    {p.stock || 0}
+                    ${Number(p.precio).toFixed(2)}
                   </td>
                   <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
                     {p.Categorium?.nombre || "Sin categoría"}
@@ -440,13 +427,8 @@ export default function AdminProducts() {
             <div style={{ marginBottom: "15px" }}>
               <strong style={{ color: "#9ca3af" }}>Precio:</strong>
               <p style={{ marginTop: "5px", fontSize: "16px" }}>
-                ${selectedProduct.precio?.toFixed(2)}
+                ${selectedProduct.precio ? Number(selectedProduct.precio).toFixed(2) : ""}
               </p>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <strong style={{ color: "#9ca3af" }}>Stock:</strong>
-              <p style={{ marginTop: "5px", fontSize: "16px" }}>{selectedProduct.stock || 0}</p>
             </div>
 
             <div style={{ marginBottom: "15px" }}>
@@ -562,50 +544,27 @@ export default function AdminProducts() {
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
-                <div>
-                  <label style={{ display: "block", marginBottom: "5px", color: "#9ca3af" }}>
-                    Precio: *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="precio"
-                    value={formData.precio}
-                    onChange={handleInputChange}
-                    required
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      borderRadius: "6px",
-                      border: "1px solid #4b5563",
-                      background: "#374151",
-                      color: "#fff",
-                      fontSize: "14px",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: "block", marginBottom: "5px", color: "#9ca3af" }}>
-                    Stock:
-                  </label>
-                  <input
-                    type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleInputChange}
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      borderRadius: "6px",
-                      border: "1px solid #4b5563",
-                      background: "#374151",
-                      color: "#fff",
-                      fontSize: "14px",
-                    }}
-                  />
-                </div>
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "block", marginBottom: "5px", color: "#9ca3af" }}>
+                  Precio: *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="precio"
+                  value={formData.precio}
+                  onChange={handleInputChange}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "6px",
+                    border: "1px solid #4b5563",
+                    background: "#374151",
+                    color: "#fff",
+                    fontSize: "14px",
+                  }}
+                />
               </div>
 
               <div style={{ marginBottom: "15px" }}>
@@ -650,7 +609,7 @@ export default function AdminProducts() {
                   }}
                 >
                   <option value="">Selecciona una categoría</option>
-                  {categories.map(cat => (
+                  {defaultCategories.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.nombre}</option>
                   ))}
                 </select>
@@ -744,14 +703,15 @@ export default function AdminProducts() {
             <p style={{ marginBottom: "20px", color: "#9ca3af", fontSize: "14px" }}>
               Ingresa un producto por línea con el formato:<br/>
               <code style={{ background: "#374151", padding: "4px 8px", borderRadius: "4px", display: "inline-block", marginTop: "5px" }}>
-                nombre | descripcion | precio | stock | url_imagen | categoriaId | destacado
+                nombre | descripcion | precio | url_imagen | categoriaId | destacado
               </code>
             </p>
 
             <div style={{ marginBottom: "15px", padding: "10px", background: "#374151", borderRadius: "6px", fontSize: "13px" }}>
               <strong>Ejemplo:</strong><br/>
-              <code>PlayStation 5 | Consola de última generación | 499.99 | 10 | https://example.com/ps5.jpg | 1 | true</code><br/>
-              <code>Xbox Series X | Potencia y velocidad | 449.99 | 5 | https://example.com/xbox.jpg | 1 | false</code>
+              <code>PlayStation 5 | Consola de última generación | 499.99 | https://example.com/ps5.jpg | 1 | true</code><br/>
+              <code>Camiseta Básica | Algodón 100% | 19.99 | https://example.com/shirt.jpg | 2 | false</code><br/>
+              <code>Lámpara LED | Iluminación moderna | 29.99 | https://example.com/lamp.jpg | 3 | false</code>
             </div>
 
             <textarea
