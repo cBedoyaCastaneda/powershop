@@ -1,0 +1,49 @@
+name: Deploy Express backend to Azure Web App De Veras
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-backend:
+    runs-on: windows-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      # Clonar el repositorio
+      - uses: actions/checkout@v4
+
+      # Configurar Node.js
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+
+      # Instalar dependencias del backend
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      # Listar archivos del backend (opcional)
+      - name: List backend files
+        run: dir /s
+        shell: cmd
+
+      # Login a Azure
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BACKEND }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BACKEND }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BACKEND }}
+
+      # Deploy a Azure Web App
+      - name: Deploy backend
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'nombre-backend-app'
+          slot-name: 'Production'
+          package: ./backend   # Apunta directamente al backend
