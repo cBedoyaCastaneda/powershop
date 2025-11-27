@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '@hooks/useCart.js';
 import CartDrawer from "@components/cart/cartDrawer/cartDrawer.jsx";
-import UserMenu from '@components/layout/header/header.jsx';
 import ProductGrid from '@components/products/productGrid.jsx';
 import PageHeader from '../components/layout/header/header';
 
