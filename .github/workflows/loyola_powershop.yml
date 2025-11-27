@@ -1,3 +1,11 @@
+name: Build and deploy React Vite app to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: windows-latest
