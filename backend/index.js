@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const {Categoria,Producto,Usuario,Orden,OrdenProducto} = require("./models")
 const sequelize = require("./database/database.js")
 const cors = require("cors");
 
@@ -8,19 +7,16 @@ const cors = require("cors");
 app.use(cors()); // ✅ Esto habilita CORS
 app.use(express.json());
 
-// Middleware para parsear JSON
-app.use(express.json());
-
 // Importar rutas modulares
-const categoriasRouters = require("./routes/categorias");
-const ordenesRouters = require("./routes/ordenes");
-const productosRouters = require("./routes/productos");
-const usuariosRoutes = require("./routes/usuarios");
+const categoriasRouters = require("./routes/categorias.js");
+const ordenesRouters = require("./routes/ordenes.js");
+// const productosRouters = require("./routes/productos.js");
+const usuariosRoutes = require("./routes/usuarios.js");
 
 // Usar las rutas
 app.use("/categorias", categoriasRouters);
 app.use("/ordenes", ordenesRouters);
-app.use("/productos", productosRouters);
+// app.use("/productos", productosRouters);
 app.use("/users", usuariosRoutes);
 
 // INICIO 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Orden, Usuario, Producto, OrdenProducto, sequelize } = require('../database');
+const { Orden, Usuario, Producto, OrdenProducto, sequelize } = require("./../models");
 
 /**
  * Route: POST /

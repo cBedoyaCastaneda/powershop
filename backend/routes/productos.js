@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Producto, Categoria } = require("../models");
-
+const { Producto, Categoria } = require("./../models");
 /**
  * Route: POST /
  * Creates a new product.

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Categoria, Producto } = require('../database');;
+const { Categoria, Producto } = require("./../models");
 
 /**
  * Route: POST /
