@@ -1,42 +1,110 @@
 const express = require("express");
 const app = express();
-const {Category,Product,User} = require("./models")
+const {Categoria,Producto,Usuario,Orden,OrdenProducto} = require("./models")
 const sequelize = require("./database.js")
 
 // USERS
 app.get("/users", async (req, res) => {
-  const data = await User.findAll();
+  const data = await Usuario.findAll();
   res.json(data);
 });
 
 app.post("/users", async (req, res) => {
-  const newUser = await User.create(req.body);
+  const newUser = await Usuario.create(req.body);
   res.json(newUser);
 });
 
 // CATEGORIES
 app.get("/categories", async (req, res) => {
-  const data = await Category.findAll();
+  const data = await Categoria.findAll();
   res.json(data);
 });
 
 app.post("/categories", async (req, res) => {
-  const newCategory = await Category.create(req.body);
+  const newCategory = await Categoria.create(req.body);
   res.json(newCategory);
 });
 
 // PRODUCTS
 app.get("/products", async (req, res) => {
-  const data = await Product.findAll({
-    include: Category // para traer categoría
+  const data = await Producto.findAll({
+    include: Categoria // para traer categoría
   });
   res.json(data);
 });
 
 app.post("/products", async (req, res) => {
-  const newProduct = await Product.create(req.body);
+  const newProduct = await Producto.create(req.body);
   res.json(newProduct);
 });
+
+// Ordenes
+app.get("/ordenes", async (req, res) => {
+  try {
+    const ordenes = await Orden.findAll({
+      include: [
+        {
+          model: Producto,
+          through: {
+            attributes: ['cantidad']   // Muestra la cantidad en la relación
+          }
+        }
+      ]
+    });
+
+    res.json(ordenes);
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.post("/ordenes", async (req, res) => {
+  try {
+    const { usuarioId, fecha, productos } = req.body;
+
+    // 1. Crear la orden sin totales aún
+    const nuevaOrden = await Orden.create({
+      usuarioId,
+      fecha,
+      totalSinIGV: 0,
+      totalConIGV: 0
+    });
+
+    // 2. Crear los productos asociados
+    let total = 0;
+
+    for (const item of productos) {
+      await OrdenProducto.create({
+        ordenId: nuevaOrden.id,
+        productoId: item.productoId,
+        cantidad: item.cantidad
+      });
+
+      // Calcular total (requiere precio del producto)
+      // Si tienes modelo Producto:
+      const producto = await Producto.findByPk(item.productoId);
+      total += producto.precio * item.cantidad;
+    }
+
+    const sinIGV = total;
+    const conIGV = total * 1.18;
+
+    // 3. Actualizar totales
+    await nuevaOrden.update({
+      totalSinIGV: sinIGV,
+      totalConIGV: conIGV
+    });
+
+    res.json({
+      message: 'Orden creada correctamente',
+      orden: nuevaOrden
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+})
 
 // INICIO 
 async function start() {
