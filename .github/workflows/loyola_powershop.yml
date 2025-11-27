@@ -1,11 +1,3 @@
-name: Build and deploy React Vite app to Azure Web App
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
 jobs:
   build:
     runs-on: windows-latest
@@ -31,14 +23,18 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: react-app
+
+      - name: List files
+        run: dir /s
+
       - uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_019D2B324EF046C491DD03CE18314B00 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_46F3BFFB64C243F7B881FBF167C4EF7D }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0ECE84854D2849099767D764A17F7F99 }}
+
       - uses: azure/webapps-deploy@v3
         with:
           app-name: 'proyecto-negocio-de-superpoderes'
           slot-name: 'Production'
-          package: ./react-app
-
+          package: ./dist  # apunta a la carpeta con index.html
