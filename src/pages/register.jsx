@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useUsers from "@hooks/api/useUsers"
 import './register.css';
 
 export default function Registro() {
@@ -16,6 +17,7 @@ export default function Registro() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { GetUsers, CreateUser } = useUsers()
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,8 +65,7 @@ export default function Registro() {
 
     try {
       // Verificar si el email ya existe
-      const checkResponse = await fetch('http://localhost:3000/users');
-      const usuarios = await checkResponse.json();
+      const usuarios = await GetUsers()
       
       const emailExiste = usuarios.find(
         (u) => u.email?.toLowerCase() === formData.email.toLowerCase()
@@ -86,22 +87,10 @@ export default function Registro() {
         //direccion
         esAdmin: false
       };
-
-      const response = await fetch('http://localhost:3000/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(nuevoUsuario),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al registrar el usuario');
-      }
-
-      const data = await response.json();
+      const body = JSON.stringify(nuevoUsuario)
+      const data = await CreateUser(body)
       console.log('Usuario creado:', data);
-      localStorage.setItem('usuarioLogueado', JSON.stringify(nuevoUsuario));
+      localStorage.setItem('usuarioLogueado', JSON.stringify(body));
 
       setSuccess('¡Registro exitoso! Redirigiendo al login...');
 
