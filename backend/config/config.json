@@ -1,10 +1,16 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
-    "database": "database_development",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "username": "azure_administrador",
+    "password": "GrupoProgramacionWeb651",
+    "database": "postgres",
+    "host": "programacion-web-grupo2-server.postgres.database.azure.com",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
   },
   "test": {
     "username": "root",

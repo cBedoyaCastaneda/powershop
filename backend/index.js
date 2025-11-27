@@ -43,7 +43,7 @@ async function start() {
   try {
     await sequelize.authenticate();
     await sequelize.sync(); // crea tablas si no existen
-    console.log("Conectado a MySQL");
+    console.log("Conectado a PostgreSQL");
 
     app.listen(3000, () => console.log("Servidor en puerto 3000"));
   } catch (err) {
