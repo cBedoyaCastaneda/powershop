@@ -10,6 +10,7 @@ jobs:
   deploy-backend:
     runs-on: windows-latest
     permissions:
+      id-token: write
       contents: read
     steps:
       # Clonar el repositorio
