@@ -3,16 +3,14 @@ const app = express();
 const {Categoria,Producto,Usuario,Orden,OrdenProducto} = require("./models")
 const sequelize = require("./database/database.js")
 
-// USERS
-app.get("/users", async (req, res) => {
-  const data = await Usuario.findAll();
-  res.json(data);
-});
+// Middleware para parsear JSON
+app.use(express.json());
 
-app.post("/users", async (req, res) => {
-  const newUser = await Usuario.create(req.body);
-  res.json(newUser);
-});
+// Importar rutas modulares
+const usuariosRoutes = require("./routes/usuarios");
+
+// Usar las rutas
+app.use("/users", usuariosRoutes);
 
 // CATEGORIES
 app.get("/categories", async (req, res) => {
@@ -82,7 +80,6 @@ app.post("/ordenes", async (req, res) => {
       });
 
       // Calcular total (requiere precio del producto)
-      // Si tienes modelo Producto:
       const producto = await Producto.findByPk(item.productoId);
       total += producto.precio * item.cantidad;
     }
