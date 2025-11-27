@@ -2,6 +2,8 @@
 import AdminLayout from "@components/layout/adminLayout";
 import MainLayout from "@components/layout/mainLayout";
 import ProductDetail from "@components/products/productDetail/productDetail";
+import AdminGuard from "@guards/AdminGuard";
+import AuthGuard from "@guards/AuthGuard";
 import AdminCategories from "@pages/admin/categories";
 import AdminDashboard from "@pages/admin/dashboard";
 import AdminOrderDetail from "@pages/admin/orderDetail";
@@ -19,8 +21,7 @@ import Unauthorized from "@pages/unauthorized";
 import OrderSuccess from "@pages/orderSuccess";
 import Registro from "@pages/register";
 import { createBrowserRouter } from "react-router-dom";
-import AdminGuard from "@guards/AdminGuard";
-import AuthGuard from "@guards/AuthGuard"
+import AdminUsersDetail from "../pages/admin/userDetail";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +60,7 @@ const router = createBrowserRouter([
       { path: "", element: <AdminDashboard /> },
       { path: "dashboard", element: <AdminDashboard /> },
       { path: "users", element: <AdminUsers /> },
+      { path: "users/:id", element: <AdminUsersDetail /> },
       { path: "usersRegistered", element: <UsersRegistered /> },
       { path: "categories", element: <AdminCategories /> },
       { path: "orders", element: <AdminOrders /> },

@@ -1,8 +1,8 @@
 // src/pages/admin/userDetail.jsx
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { userService } from "../../services/user.service";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { orderService } from "../../services/order.service";
+import { userService } from "../../services/user.service";
 
 export default function UserDetail() {
   const { id } = useParams();
@@ -157,7 +157,7 @@ export default function UserDetail() {
                   style={{ borderBottom: "1px solid #333", padding: "8px" }}
                 >
                   <Link
-                    to={`/adminOrdenes/${o.id}`}
+                    to={`/admin/orders/${o.id}`}
                     style={{
                       color: "#4fd1ff",
                       textDecoration: "underline",

@@ -1,3 +1,16 @@
+ ## Requirements
+- react
+- vite
+- mucho mas
+## En el backend
+- dotenv
+- express
+- mysql2
+- pg-hstore
+- pg
+- sequelize-cli
+- sequelize
+
 # React + Vite
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

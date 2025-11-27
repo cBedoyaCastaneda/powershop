@@ -105,7 +105,7 @@ export default function AdminUsers() {
                 <tr key={u.id}>
                   <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
                     <Link
-                      to={`/adminUsuarios/${u.id}`}
+                      to={`/admin/users/${u.id}`}
                       style={{
                         color: "#4fd1ff",
                         textDecoration: "underline",

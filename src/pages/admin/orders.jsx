@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
-import { orderService } from "../../services/order.service";
 import { Link } from "react-router-dom";
+import { orderService } from "../../services/order.service";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -78,7 +78,7 @@ const Orders = () => {
             <tr key={o.id}>
               <td style={{ borderBottom: "1px solid #333", padding: "8px" }}>
                 <Link
-                  to={`/adminOrdenes/${o.id}`}
+                  to={`/admin/orders/${o.id}`}
                   style={{ color: "#4fd1ff", textDecoration: "underline" }}
                 >
                   {o.id}
