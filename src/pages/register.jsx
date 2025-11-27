@@ -1,31 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import usuarios from '../components/user/users-list';
 import './register.css';
-
-const LS_REGISTERED = 'ps_registered_users_v1';
-
-const getRegisteredUsers = () => {
-  const raw = localStorage.getItem(LS_REGISTERED);
-  return raw ? JSON.parse(raw) : [];
-};
-
-const saveRegisteredUsers = (list) => {
-  localStorage.setItem(LS_REGISTERED, JSON.stringify(list));
-};
 
 export default function Registro() {
   const [formData, setFormData] = useState({
-    name: '',
-    lastname: '',
-    user: '',
-    contraseña: '',
-    confirmarContraseña: '',
+    nombre: '',
+    apellido: '',
+    email: '',
+    password: '',
+    confirmarPassword: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -36,80 +25,93 @@ export default function Registro() {
     }));
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
     // Validaciones
     if (
-      !formData.name ||
-      !formData.lastname ||
-      !formData.user ||
-      !formData.contraseña ||
-      !formData.confirmarContraseña
+      !formData.nombre ||
+      !formData.apellido ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmarPassword
     ) {
       setError('Todos los campos son obligatorios');
       return;
     }
 
-    if (formData.contraseña !== formData.confirmarContraseña) {
+    if (formData.password !== formData.confirmarPassword) {
       setError('Las contraseñas no coinciden');
       return;
     }
 
-    if (formData.contraseña.length < 6) {
+    if (formData.password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
-    // Revisar usuarios base (archivo users-list) – opcional
-    const usuarioExistenteBase = usuarios.find(
-      (u) => (u.user || '').toLowerCase() === formData.user.toLowerCase()
-    );
-    if (usuarioExistenteBase) {
-      setError('Este usuario ya está registrado (lista base)');
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Por favor ingresa un email válido');
       return;
     }
 
-    // Revisar usuarios registrados en localStorage
-    const registrados = getRegisteredUsers();
-    const usuarioExistente = registrados.find(
-      (u) => u.username.toLowerCase() === formData.user.toLowerCase()
-    );
-    if (usuarioExistente) {
-      setError('Este usuario ya está registrado');
-      return;
+    setLoading(true);
+
+    try {
+      // Verificar si el email ya existe
+      const checkResponse = await fetch('http://localhost:3000/users');
+      const usuarios = await checkResponse.json();
+      
+      const emailExiste = usuarios.find(
+        (u) => u.email?.toLowerCase() === formData.email.toLowerCase()
+      );
+
+      if (emailExiste) {
+        setError('Este email ya está registrado');
+        setLoading(false);
+        return;
+      }
+
+      // Crear el nuevo usuario
+      const nuevoUsuario = {
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        password: formData.password, // Se encriptará en el backend
+        tipo: 'usuario'
+      };
+
+      const response = await fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoUsuario),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al registrar el usuario');
+      }
+
+      const data = await response.json();
+      console.log('Usuario creado:', data);
+
+      setSuccess('¡Registro exitoso! Redirigiendo al login...');
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+
+    } catch (err) {
+      console.error('Error en registro:', err);
+      setError('Error al registrar. Por favor intenta de nuevo.');
+    } finally {
+      setLoading(false);
     }
-
-    const nuevoUsuario = {
-      id: `r${registrados.length + 1}`,
-      name: formData.name,
-      lastname: formData.lastname,
-      username: formData.user,       // campo "Usuario" del formulario
-      password: formData.contraseña,  // guardamos la contraseña tal cual (solo para la demo)
-      active: true,
-      createdAt: new Date().toISOString(),
-    };
-
-    const updated = [...registrados, nuevoUsuario];
-    saveRegisteredUsers(updated);
-
-    setSuccess('¡Registro exitoso! Redirigiendo al login...');
-    ///CREAR EL USUARIO
-    usuarios.push({
-      id: usuarios.length+1,
-      name: formData.name,
-      lastname: formData.lastname,
-      user: formData.user,
-      tipo: "usuario",
-      contraseña: formData.contraseña,
-      featured: false
-    })
-
-    setTimeout(() => {
-      navigate('/login');
-    }, 2000);
   };
 
   return (
@@ -123,60 +125,65 @@ export default function Registro() {
         <form onSubmit={handleRegister} className="registro-form">
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="name">Nombre</label>
+              <label htmlFor="nombre">Nombre</label>
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="nombre"
+                name="nombre"
+                value={formData.nombre}
                 onChange={handleChange}
                 placeholder="Tu nombre"
                 required
+                disabled={loading}
               />
             </div>
             <div className="form-group">
-              <label htmlFor="lastname">Apellido</label>
+              <label htmlFor="apellido">Apellido</label>
               <input
                 type="text"
-                id="lastname"
-                name="lastname"
-                value={formData.lastname}
+                id="apellido"
+                name="apellido"
+                value={formData.apellido}
                 onChange={handleChange}
                 placeholder="Tu apellido"
                 required
+                disabled={loading}
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="Usuario">Usuario</label>
+            <label htmlFor="email">Email</label>
             <input
-              type="text"
-              id="Usuario"
-              name="user"
-              value={formData.user}
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
-              placeholder="Elige tu usuario"
+              placeholder="tu@email.com"
               required
+              disabled={loading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="contraseña">Contraseña</label>
+            <label htmlFor="password">Contraseña</label>
             <div className="password-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
-                id="contraseña"
-                name="contraseña"
-                value={formData.contraseña}
+                id="password"
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
                 placeholder="Mínimo 6 caracteres"
                 required
+                disabled={loading}
               />
               <button
                 type="button"
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
               >
                 {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
@@ -184,23 +191,23 @@ export default function Registro() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmarContraseña">Confirmar Contraseña</label>
+            <label htmlFor="confirmarPassword">Confirmar Contraseña</label>
             <div className="password-wrapper">
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
-                id="confirmarContraseña"
-                name="confirmarContraseña"
-                value={formData.confirmarContraseña}
+                id="confirmarPassword"
+                name="confirmarPassword"
+                value={formData.confirmarPassword}
                 onChange={handleChange}
                 placeholder="Repite tu contraseña"
                 required
+                disabled={loading}
               />
               <button
                 type="button"
                 className="toggle-password"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                disabled={loading}
               >
                 {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
               </button>
@@ -210,8 +217,8 @@ export default function Registro() {
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
 
-          <button type="submit" className="register-btn">
-            Registrarse
+          <button type="submit" className="register-btn" disabled={loading}>
+            {loading ? 'Registrando...' : 'Registrarse'}
           </button>
         </form>
 
@@ -221,6 +228,7 @@ export default function Registro() {
             <button
               className="login-link"
               onClick={() => navigate('/login')}
+              disabled={loading}
             >
               Inicia sesión
             </button>

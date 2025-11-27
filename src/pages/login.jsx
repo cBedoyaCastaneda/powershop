@@ -1,56 +1,55 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import usuarios from '../components/user/users-list';
 import './login.css';
 
-const LS_REGISTERED = 'ps_registered_users_v1';
-
-const getRegisteredUsers = () => {
-  const raw = localStorage.getItem(LS_REGISTERED);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-};
-
 export default function Login() {
-  const [user, setUser] = useState('');
-  const [contraseña, setContraseña] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  //Iniciar sesion
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    const registrados = getRegisteredUsers();
+    try {
+      // Usar el endpoint de login que valida con bcrypt
+      const response = await fetch('http://localhost:3000/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password
+        })
+      });
 
-    const userRegistrado = registrados.find(
-      (u) =>
-        u.active !== false &&                           // solo activos
-        (u.username || '').toLowerCase() ===            // username del registro
-          user.trim().toLowerCase() &&
-        u.password === contraseña                       // contraseña del registro
-    );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Error al iniciar sesión');
+      }
 
-    // 2️⃣ Usuario base (Sebastian) desde users-list.jsx
-    const userBase = usuarios.find(
-      (u) => u.user === user && u.contraseña === contraseña
-    );
+      const usuario = await response.json();
 
-    // 3️⃣ Si encuentra alguno de los dos, iniciar sesión
-    const usuario = userRegistrado || userBase;
-
-    if (usuario) {
+      // Guardar usuario en localStorage
       localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
-      if (usuario.tipo === "administrador") navigate('/admin');
-      else navigate('/home');
-    } else {
-      setError('Usuario o contraseña incorrectos');
+      
+      // Redirigir según el tipo de usuario
+      if (usuario.tipo === "administrador" || usuario.role === "admin") {
+        navigate('/admin');
+      } else {
+        navigate('/home');
+      }
+
+    } catch (err) {
+      console.error('Error en login:', err);
+      setError(err.message || 'Email o contraseña incorrectos');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,32 +63,35 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label htmlFor="user">Usuario</label>
+            <label htmlFor="email">Email</label>
             <input
-              type="text"
-              id="user"
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
-              placeholder="Ingresa tu usuario"
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Ingresa tu email"
               required
+              disabled={loading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="contraseña">Contraseña</label>
+            <label htmlFor="password">Contraseña</label>
             <div className="password-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
-                id="contraseña"
-                value={contraseña}
-                onChange={(e) => setContraseña(e.target.value)}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Ingresa tu contraseña"
                 required
+                disabled={loading}
               />
               <button
                 type="button"
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
               >
                 {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
@@ -98,8 +100,8 @@ export default function Login() {
 
           {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" className="login-btn">
-            Iniciar Sesión
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? 'Cargando...' : 'Iniciar Sesión'}
           </button>
         </form>
 
@@ -107,6 +109,7 @@ export default function Login() {
           <button
             className="forgot-btn"
             onClick={() => navigate('/recuperar-contraseña')}
+            disabled={loading}
           >
             ¿Olvidaste tu contraseña?
           </button>
@@ -115,6 +118,7 @@ export default function Login() {
             <button
               className="register-link"
               onClick={() => navigate('/registro')}
+              disabled={loading}
             >
               Regístrate aquí
             </button>
